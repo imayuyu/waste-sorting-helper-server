@@ -8,7 +8,7 @@ import javax.persistence.Table;
 @Table(name = "user")
 public class User {
     @Id
-    private long id;
+    private Long id;
     private String name;
     private int score;
 
