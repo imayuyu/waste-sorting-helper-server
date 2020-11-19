@@ -2,6 +2,8 @@
 
 Back end for project "Research on campus garbage sorting and Recycling".
 
+See also: [waste-sorting-helper-weapp](https://github.com/charlie0129/waste-sorting-helper-weapp).
+
 *All APIs are for test purposes.*
 
 **This project is still in its alpha stage,  under development. There is no guarantee that the program can run without problems.**
