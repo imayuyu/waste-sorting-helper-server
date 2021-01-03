@@ -16,7 +16,8 @@ public class HTTPRequestController {
     private WasteRepository wasteRepository;
 
     @PostMapping("/add-user")
-    public @ResponseBody String addUser(@RequestParam(value = "id") Long id, @RequestParam(value = "name", defaultValue = "") String name) {
+    public @ResponseBody String addUser(@RequestParam(value = "id") Long id,
+                                        @RequestParam(value = "name", defaultValue = "") String name) {
         Optional<User> referencedUser = userRepository.findById(id);
         if (referencedUser.isPresent()) {
             return "User already present.";
@@ -28,11 +29,20 @@ public class HTTPRequestController {
 
     }
 
+    @GetMapping("/get-user")
+    public @ResponseBody String getUser(@RequestParam(value = "id") Long id) {
+        Optional<User> referencedUser = userRepository.findById(id);
+        return referencedUser.map(User::getName).orElse(null);
+    }
+
     @PostMapping("/add-waste")
-    public @ResponseBody String addWaste(@RequestParam(value = "id") Long id, @RequestParam(value = "category") WasteCategory category) {
+    public @ResponseBody String addWaste(@RequestParam(value = "id") Long id,
+                                         @RequestParam(value = "category") WasteCategory category,
+                                         @RequestParam(value = "weight") Double weight,
+                                         @RequestParam(value = "dustbinid") Long dustbinId) {
         Optional<User> referencedUser = userRepository.findById(id);
         if (referencedUser.isPresent()) {
-            Waste newWaste = new Waste(referencedUser.get(), category, LocalDateTime.now());
+            Waste newWaste = new Waste(referencedUser.get(), category, weight, dustbinId,LocalDateTime.now());
             wasteRepository.save(newWaste);
             return "Saved.";
         } else {
@@ -40,25 +50,31 @@ public class HTTPRequestController {
         }
     }
 
-    @GetMapping("/get-waste-list")
-    public ArrayList<Waste> getWasteList(@RequestParam(value = "id") Long id) {
+    @GetMapping("/get-waste-list-top20")
+    public ArrayList<Waste> getWasteListTop(@RequestParam(value = "id") Long id) {
         Optional<User> referencedUser = userRepository.findById(id);
         if (referencedUser.isPresent()) {
-            ArrayList<Waste> wasteArrayList = wasteRepository.findByUser(referencedUser.get());
-            Collections.reverse(wasteArrayList);
-            return wasteArrayList;
+            return wasteRepository.findTop20ByUserOrderByIdDesc(referencedUser.get());
         } else {
             return null;
         }
     }
 
-    @GetMapping("/get-score")
-    public int getScore(@RequestParam(value = "id") Long id) {
+    @GetMapping("/get-waste-list-all")
+    public ArrayList<Waste> getWasteListAll(@RequestParam(value = "id") Long id) {
         Optional<User> referencedUser = userRepository.findById(id);
         if (referencedUser.isPresent()) {
-            ArrayList<Waste> wasteArrayList = wasteRepository.findByUser(referencedUser.get());
+            return wasteRepository.findByUserOrderByIdDesc(referencedUser.get());
+        } else {
+            return null;
+        }
+    }
 
-            return wasteArrayList.size();
+    @GetMapping("/get-credit")
+    public int getCredit(@RequestParam(value = "id") Long id) {
+        Optional<User> referencedUser = userRepository.findById(id);
+        if (referencedUser.isPresent()) {
+            return 666;
         } else {
             return 0;
         }

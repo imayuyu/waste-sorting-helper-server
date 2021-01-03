@@ -17,15 +17,35 @@ public class Waste {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @JsonBackReference
     private User user;
+    private Double weight;
+    private Long dustbinId;
 
     public Waste() {
 
     }
 
-    public Waste(User user, WasteCategory category, LocalDateTime time){
-        this.user=user;
-        this.category=category;
+    public Waste(User user, WasteCategory category, Double weight, Long dustbinId ,LocalDateTime time) {
+        this.user = user;
+        this.category = category;
         this.time = time;
+        this.weight=weight;
+        this.dustbinId=dustbinId;
+    }
+
+    public Long getDustbinId() {
+        return dustbinId;
+    }
+
+    public void setDustbinId(Long dustbinId) {
+        this.dustbinId = dustbinId;
+    }
+
+    public Double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
     }
 
     public Long getId() {
