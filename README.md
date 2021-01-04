@@ -12,13 +12,11 @@ See also: [waste-sorting-helper-weapp](https://github.com/charlie0129/waste-sort
 
 - [x] Basic features including user-addition, waste-addition, waste-list-retrieving and score-retrieving
 
-- [ ] Add weight property to wastes
+- [x] Add weight property to wastes
 
 - [ ] Update the "score" field in User class on demand
 
-- [ ] User log in authorization
-
-- [ ] Administrator features, such as waste counting.
+- [x] User log in authorization
 
 - [ ] Incorrect waste-sorting tag for user
 
@@ -37,25 +35,40 @@ See also: [waste-sorting-helper-weapp](https://github.com/charlie0129/waste-sort
      |  id  |                  | The user's identification number. |
      | name | (defaults to "") |         The user's name.          |
    
-2. Add waste to a user.
+2. Check the user credentials.
+
+   - Use `HTTP GET` method at `/get-user`
+
+       | KEY  | VALUE | DESCRIPTION                       |
+       | ---- | ----- | --------------------------------- |
+       | id   |       | The user's identification number. |
+
+   - Returns the name of the user, or `null` if the user does not exist.
+
+3. Add waste to a user.
 
    - Use `HTTP POST` method at `/add-waste`
 
-     |   KEY    | VALUE |                         DESCRIPTION                          |
-     | :------: | :---: | :----------------------------------------------------------: |
-     |    id    |       |              The user that the waste longs to.               |
-     | category |       | The category of the waste. Possible values are `HAZARDOUS_WASTE`,  `RECYCLABLE_WASTE`, ` FOOD_WASTE` and `RESIDUAL_WASTE`. |
+     |    KEY    | VALUE |                         DESCRIPTION                          |
+     | :-------: | :---: | :----------------------------------------------------------: |
+     |    id     |       |              The user that the waste longs to.               |
+     | category  |       | The category of the waste. Possible values are `HAZARDOUS_WASTE`,  `RECYCLABLE_WASTE`, ` FOOD_WASTE` and `RESIDUAL_WASTE`. |
+     |  weight   |       |                  The weight of the rubbish.                  |
+     | dustbinid |       |             The corresponding ID of the dustbin.             |
 
-3. Retrieve a list of thrown wastes.
-   - Use `HTTP GET` method at `/get-waste-list`
+4. Retrieve a list of thrown wastes.
+
+   - Use `HTTP GET` method at `/get-waste-list-top20`
+
+   - Use `HTTP GET` method at `/get-waste-list-all`
 
      | KEY  | VALUE |             DESCRIPTION             |
      | :--: | :---: | :---------------------------------: |
      |  id  |       | The user that the wastes belong to. |
      
    - The required messages will be returned in JSON format.
-   
-4. Retrieve the score of a user.
+
+5. Retrieve the score of a user.
 
    - Use `HTTP GET` method at `/get-score`
 
