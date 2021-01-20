@@ -1,6 +1,7 @@
 package com.charliechiang.wastesortinghelperserver;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -20,11 +21,11 @@ public class HTTPRequestController {
                                         @RequestParam(value = "name", defaultValue = "") String name) {
         Optional<User> referencedUser = userRepository.findById(id);
         if (referencedUser.isPresent()) {
-            return "User already present.";
+            throw new ResourceConflictException();
         } else {
             User newUser = new User(id, name);
             userRepository.save(newUser);
-            return "Saved.";
+            return id + " " + name + " saved.";
         }
 
     }
@@ -32,7 +33,11 @@ public class HTTPRequestController {
     @GetMapping("/get-user")
     public @ResponseBody String getUser(@RequestParam(value = "id") Long id) {
         Optional<User> referencedUser = userRepository.findById(id);
-        return referencedUser.map(User::getName).orElse(null);
+        if(referencedUser.isPresent()) {
+            return referencedUser.get().getName();
+        } else {
+            throw new ResourceNotFoundException();
+        }
     }
 
     @PostMapping("/add-waste")
@@ -55,7 +60,7 @@ public class HTTPRequestController {
             wasteRepository.save(newWaste);
             return "Saved.";
         } else {
-            return "User not present.";
+            throw new ResourceNotFoundException();
         }
     }
 
@@ -65,7 +70,7 @@ public class HTTPRequestController {
         if (referencedUser.isPresent()) {
             return wasteRepository.findTop20ByUserOrderByIdDesc(referencedUser.get());
         } else {
-            return null;
+            throw new ResourceNotFoundException();
         }
     }
 
@@ -75,7 +80,7 @@ public class HTTPRequestController {
         if (referencedUser.isPresent()) {
             return wasteRepository.findByUserOrderByIdDesc(referencedUser.get());
         } else {
-            return null;
+            throw new ResourceNotFoundException();
         }
     }
 
@@ -85,9 +90,16 @@ public class HTTPRequestController {
         if (referencedUser.isPresent()) {
             return 666;
         } else {
-            return 0;
+            throw new ResourceNotFoundException();
         }
     }
 
 
 }
+
+
+@ResponseStatus(HttpStatus.NOT_FOUND)
+class ResourceNotFoundException extends RuntimeException {}
+
+@ResponseStatus(HttpStatus.CONFLICT)
+class ResourceConflictException extends RuntimeException {}
