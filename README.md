@@ -18,7 +18,7 @@ See also: [waste-sorting-helper-weapp](https://github.com/charlie0129/waste-sort
 
 - [x] User log in authorization
 
-- [ ] Incorrect waste-sorting tag for user
+- [x] Incorrect waste-sorting tag for user
 
   ......
 
@@ -30,31 +30,32 @@ See also: [waste-sorting-helper-weapp](https://github.com/charlie0129/waste-sort
 
    - Use `HTTP POST` method at `/add-user`
 
-     | KEY  |      VALUE       |            DESCRIPTION            |
-     | :--: | :--------------: | :-------------------------------: |
-     |  id  |                  | The user's identification number. |
-     | name | (defaults to "") |         The user's name.          |
+     | KEY  |          VALUE          |        DESCRIPTION         |
+     | :--: | :---------------------: | :------------------------: |
+     |  id  |         Integer         | The user's identification. |
+     | name | String (defaults to "") |      The user's name.      |
    
 2. Check the user credentials.
 
    - Use `HTTP GET` method at `/get-user`
 
-       | KEY  | VALUE | DESCRIPTION                       |
-       | ---- | ----- | --------------------------------- |
-       | id   |       | The user's identification number. |
+       | KEY  | VALUE   | DESCRIPTION                       |
+       | ---- | ------- | --------------------------------- |
+       | id   | Integer | The user's identification number. |
 
-   - Returns the name of the user, or `null` if the user does not exist.
+   - Returns the name of the user, or `404 Not Found` if the user does not exist.
 
 3. Add waste to a user.
 
    - Use `HTTP POST` method at `/add-waste`
 
-     |    KEY    | VALUE |                         DESCRIPTION                          |
-     | :-------: | :---: | :----------------------------------------------------------: |
-     |    id     |       |              The user that the waste longs to.               |
-     | category  |       | The category of the waste. Possible values are `HAZARDOUS_WASTE`,  `RECYCLABLE_WASTE`, ` FOOD_WASTE` and `RESIDUAL_WASTE`. |
-     |  weight   |       |                  The weight of the rubbish.                  |
-     | dustbinid |       |             The corresponding ID of the dustbin.             |
+     |    KEY    |        VALUE         |                         DESCRIPTION                          |
+     | :-------: | :------------------: | :----------------------------------------------------------: |
+     |    id     |       Integer        |            The user's ID that the waste longs to.            |
+     | category  |     Enumeration      | The category of the waste. Possible values are `HAZARDOUS_WASTE`,  `RECYCLABLE_WASTE`, ` FOOD_WASTE` and `RESIDUAL_WASTE`. |
+     |  weight   | Floating Point Value |                  The weight of the rubbish.                  |
+     | dustbinid |       Integer        |             The corresponding ID of the dustbin.             |
+     |   time    |        String        | Submission time in the format of "yyyy-MM-dd HH:mm:ss". Example: "2012-02-01 12:01:02". |
 
 4. Retrieve a list of thrown wastes.
 
@@ -62,22 +63,31 @@ See also: [waste-sorting-helper-weapp](https://github.com/charlie0129/waste-sort
 
    - Use `HTTP GET` method at `/get-waste-list-all`
 
-     | KEY  | VALUE |             DESCRIPTION             |
-     | :--: | :---: | :---------------------------------: |
-     |  id  |       | The user that the wastes belong to. |
+     | KEY  |  VALUE  |             DESCRIPTION             |
+     | :--: | :-----: | :---------------------------------: |
+     |  id  | Integer | The user that the wastes belong to. |
      
    - The required messages will be returned in JSON format.
 
-5. Retrieve the score of a user.
+5. Retrieve the credit of a user.
 
-   - Use `HTTP GET` method at `/get-score`
+   - Use `HTTP GET` method at `/get-credit`
 
-     | KEY  | VALUE |             DESCRIPTION             |
-     | :--: | :---: | :---------------------------------: |
-     |  id  |       | The user that the score belongs to. |
+     | KEY  |  VALUE  |             DESCRIPTION             |
+     | :--: | :-----: | :---------------------------------: |
+     |  id  | Integer | The user that the score belongs to. |
      
 
+6. Report an incorrect categorization.
 
+    - Use `HTTP POST` method at `"/report-incorrect-categorization"`
+
+        |    KEY    |  VALUE  |                         DESCRIPTION                          |
+        | :-------: | :-----: | :----------------------------------------------------------: |
+        | dustbinid | Integer |             The corresponding ID of the dustbin.             |
+        |   time    | String  | Submission time in the format of "yyyy-MM-dd HH:mm:ss". Example: "2012-02-01 12:01:02". |
+
+        
 
 ## How to run this project
 
