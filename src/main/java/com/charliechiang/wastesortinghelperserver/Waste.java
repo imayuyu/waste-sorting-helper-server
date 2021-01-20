@@ -18,26 +18,39 @@ public class Waste {
     @JsonBackReference
     private User user;
     private Double weight;
-    private Long dustbinId;
+    @ManyToOne
+    @JoinColumn(name = "dustbin_id", referencedColumnName = "id")
+    private Dustbin dustbin;
+
+    public Boolean getCorrectlyCategorized() {
+        return isCorrectlyCategorized;
+    }
+
+    public void setCorrectlyCategorized(Boolean correctlyCategorized) {
+        isCorrectlyCategorized = correctlyCategorized;
+    }
+
+    private Boolean isCorrectlyCategorized;
 
     public Waste() {
 
     }
 
-    public Waste(User user, WasteCategory category, Double weight, Long dustbinId ,LocalDateTime time) {
+    public Waste(User user, WasteCategory category, Double weight, Dustbin dustbin ,LocalDateTime time) {
         this.user = user;
         this.category = category;
         this.time = time;
         this.weight=weight;
-        this.dustbinId=dustbinId;
+        this.dustbin=dustbin;
+        this.isCorrectlyCategorized=true;
     }
 
-    public Long getDustbinId() {
-        return dustbinId;
+    public Dustbin getDustbin() {
+        return dustbin;
     }
 
-    public void setDustbinId(Long dustbinId) {
-        this.dustbinId = dustbinId;
+    public void setDustbin(Dustbin dustbin) {
+        this.dustbin = dustbin;
     }
 
     public Double getWeight() {

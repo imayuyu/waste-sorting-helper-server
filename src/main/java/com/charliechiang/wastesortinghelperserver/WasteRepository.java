@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 @Repository
 public interface WasteRepository extends CrudRepository<Waste, Long> {
+    ArrayList<Waste> findTop5ByDustbinOrderByIdDesc(Dustbin dustbin);
     ArrayList<Waste> findByUserOrderByIdDesc(User user);
     ArrayList<Waste> findTop20ByUserOrderByIdDesc(User user);
     ArrayList<Waste> findByCategory(WasteCategory category);
