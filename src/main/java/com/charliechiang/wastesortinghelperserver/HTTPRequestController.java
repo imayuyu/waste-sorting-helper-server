@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Optional;
 
 @RestController
@@ -55,7 +55,8 @@ public class HTTPRequestController {
             if (submissionTime.equals("")) {
                 submissionLocalDateTime = LocalDateTime.now();
             } else {
-                submissionLocalDateTime = LocalDateTime.parse(submissionTime);
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                submissionLocalDateTime = LocalDateTime.parse(submissionTime, dateTimeFormatter);
             }
             Optional<Dustbin> referencedDustbin = dustbinRepository.findById(dustbinId);
             if (referencedDustbin.isPresent()) {
@@ -111,7 +112,8 @@ public class HTTPRequestController {
             if (submissionTime.equals("")) {
                 submissionLocalDateTime = LocalDateTime.now();
             } else {
-                submissionLocalDateTime = LocalDateTime.parse(submissionTime);
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                submissionLocalDateTime = LocalDateTime.parse(submissionTime, dateTimeFormatter);
             }
 
             ArrayList<Waste> wasteInReferencedDustbin = wasteRepository.findTop5ByDustbinOrderByIdDesc(referencedDustbin.get());
@@ -127,11 +129,9 @@ public class HTTPRequestController {
                                          suggestedWaste.getUser().getName());
                 }
             }
-
-            throw new ResourceNotFoundException();
-        } else {
-            throw new ResourceNotFoundException();
         }
+
+        throw new ResourceNotFoundException();
 
     }
 
