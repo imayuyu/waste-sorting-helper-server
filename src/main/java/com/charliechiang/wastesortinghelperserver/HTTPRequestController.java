@@ -39,10 +39,19 @@ public class HTTPRequestController {
     public @ResponseBody String addWaste(@RequestParam(value = "id") Long id,
                                          @RequestParam(value = "category") WasteCategory category,
                                          @RequestParam(value = "weight") Double weight,
-                                         @RequestParam(value = "dustbinid") Long dustbinId) {
+                                         @RequestParam(value = "dustbinid") Long dustbinId,
+                                         @RequestParam(value = "time", defaultValue = "") String submissionTime) {
         Optional<User> referencedUser = userRepository.findById(id);
         if (referencedUser.isPresent()) {
-            Waste newWaste = new Waste(referencedUser.get(), category, weight, dustbinId,LocalDateTime.now());
+
+            LocalDateTime submissionLocalDateTime;
+            if (submissionTime.equals("")) {
+                submissionLocalDateTime = LocalDateTime.now();
+            } else {
+                submissionLocalDateTime = LocalDateTime.parse(submissionTime);
+            }
+
+            Waste newWaste = new Waste(referencedUser.get(), category, weight, dustbinId, submissionLocalDateTime);
             wasteRepository.save(newWaste);
             return "Saved.";
         } else {
@@ -79,5 +88,6 @@ public class HTTPRequestController {
             return 0;
         }
     }
+
 
 }
