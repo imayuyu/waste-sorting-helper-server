@@ -15,6 +15,8 @@ public class HTTPRequestController {
     private UserRepository userRepository;
     @Autowired
     private WasteRepository wasteRepository;
+    @Autowired
+    private DustbinRepository dustbinRepository;
 
     @PostMapping("/add-user")
     public @ResponseBody String addUser(@RequestParam(value = "id") Long id,
@@ -55,10 +57,16 @@ public class HTTPRequestController {
             } else {
                 submissionLocalDateTime = LocalDateTime.parse(submissionTime);
             }
+            Optional<Dustbin> referencedDustbin = dustbinRepository.findById(dustbinId);
+            if (referencedDustbin.isPresent()) {
+                Waste newWaste = new Waste(referencedUser.get(), category, weight, referencedDustbin.get(), submissionLocalDateTime);
+                wasteRepository.save(newWaste);
+                return "Saved.";
+            } else {
+                throw new ResourceNotFoundException();
+            }
 
-            Waste newWaste = new Waste(referencedUser.get(), category, weight, dustbinId, submissionLocalDateTime);
-            wasteRepository.save(newWaste);
-            return "Saved.";
+
         } else {
             throw new ResourceNotFoundException();
         }
@@ -92,6 +100,39 @@ public class HTTPRequestController {
         } else {
             throw new ResourceNotFoundException();
         }
+    }
+
+    @PostMapping("/report-incorrect-categorization")
+    public String reportIncorrectCategorization(@RequestParam(value = "dustbinid") Long dustbinId,
+                                         @RequestParam(value = "time") String submissionTime) {
+        Optional<Dustbin> referencedDustbin = dustbinRepository.findById(dustbinId);
+        if(referencedDustbin.isPresent()) {
+            LocalDateTime submissionLocalDateTime;
+            if (submissionTime.equals("")) {
+                submissionLocalDateTime = LocalDateTime.now();
+            } else {
+                submissionLocalDateTime = LocalDateTime.parse(submissionTime);
+            }
+
+            ArrayList<Waste> wasteInReferencedDustbin = wasteRepository.findTop5ByDustbinOrderByIdDesc(referencedDustbin.get());
+            Waste suggestedWaste;
+            for (Waste i : wasteInReferencedDustbin) {
+                if (submissionLocalDateTime.isAfter(i.getTime())) {
+                    suggestedWaste = i;
+                    suggestedWaste.setCorrectlyCategorized(false);
+                    return String.format("wasteId=%d, wasteTime=%s, userId=%d, userName=%s marked.",
+                                         suggestedWaste.getId(),
+                                         suggestedWaste.getTime().toString(),
+                                         suggestedWaste.getUser().getId(),
+                                         suggestedWaste.getUser().getName());
+                }
+            }
+
+            throw new ResourceNotFoundException();
+        } else {
+            throw new ResourceNotFoundException();
+        }
+
     }
 
 
