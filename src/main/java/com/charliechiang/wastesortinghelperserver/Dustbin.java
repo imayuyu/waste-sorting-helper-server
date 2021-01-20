@@ -13,6 +13,7 @@ public class Dustbin {
     private Double longitude;
     private Boolean isFull;
 
+
     public Dustbin() {}
 
     public Dustbin(Long id, String name, Double latitude, Double longitude) {
@@ -20,6 +21,7 @@ public class Dustbin {
         this.name=name;
         this.latitude=latitude;
         this.longitude=longitude;
+        this.isFull=false;
     }
 
     public Long getId() {
