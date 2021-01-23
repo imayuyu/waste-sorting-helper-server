@@ -52,6 +52,11 @@ public class HTTPRequestController {
         return newDustbin.getId();
     }
 
+    @GetMapping("/get-dustbin-list")
+    public @ResponseBody Iterable<Dustbin> getDustbinList() {
+        return dustbinRepository.findAll();
+    }
+
 
     @PostMapping("/add-waste")
     public @ResponseBody String addWaste(@RequestParam(value = "id") Long id,
