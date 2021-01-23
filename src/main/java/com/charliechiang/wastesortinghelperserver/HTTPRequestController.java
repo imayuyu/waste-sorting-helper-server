@@ -46,14 +46,10 @@ public class HTTPRequestController {
     public @ResponseBody Long addDustbin(@RequestParam(value = "name") String name,
                                          @RequestParam(value = "latitude") Double latitude,
                                          @RequestParam(value = "longitude") Double longitude) {
-        Optional<Dustbin> referencedDustbin = dustbinRepository.findByName(name);
-        if (referencedDustbin.isPresent()) {
-            throw new ResourceConflictException();
-        } else {
-            Dustbin newDustbin = new Dustbin(name, latitude, longitude);
-            dustbinRepository.save(newDustbin);
-            return newDustbin.getId();
-        }
+
+        Dustbin newDustbin = new Dustbin(name, latitude, longitude);
+        dustbinRepository.save(newDustbin);
+        return newDustbin.getId();
     }
 
 
