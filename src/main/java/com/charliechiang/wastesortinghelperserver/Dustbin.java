@@ -16,8 +16,7 @@ public class Dustbin {
 
     public Dustbin() {}
 
-    public Dustbin(Long id, String name, Double latitude, Double longitude) {
-        this.id=id;
+    public Dustbin(String name, Double latitude, Double longitude) {
         this.name=name;
         this.latitude=latitude;
         this.longitude=longitude;
