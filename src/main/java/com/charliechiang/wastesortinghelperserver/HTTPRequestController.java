@@ -42,6 +42,21 @@ public class HTTPRequestController {
         }
     }
 
+    @PostMapping("/add-dustbin")
+    public @ResponseBody Long addDustbin(@RequestParam(value = "name") String name,
+                                         @RequestParam(value = "latitude") Double latitude,
+                                         @RequestParam(value = "longitude") Double longitude) {
+        Optional<Dustbin> referencedDustbin = dustbinRepository.findByName(name);
+        if (referencedDustbin.isPresent()) {
+            throw new ResourceConflictException();
+        } else {
+            Dustbin newDustbin = new Dustbin(name, latitude, longitude);
+            dustbinRepository.save(newDustbin);
+            return newDustbin.getId();
+        }
+    }
+
+
     @PostMapping("/add-waste")
     public @ResponseBody String addWaste(@RequestParam(value = "id") Long id,
                                          @RequestParam(value = "category") WasteCategory category,
@@ -122,6 +137,7 @@ public class HTTPRequestController {
                 if (submissionLocalDateTime.isAfter(i.getTime())) {
                     suggestedWaste = i;
                     suggestedWaste.setCorrectlyCategorized(false);
+                    wasteRepository.save(suggestedWaste);
                     return String.format("wasteId=%d, wasteTime=%s, userId=%d, userName=%s marked.",
                                          suggestedWaste.getId(),
                                          suggestedWaste.getTime().toString(),

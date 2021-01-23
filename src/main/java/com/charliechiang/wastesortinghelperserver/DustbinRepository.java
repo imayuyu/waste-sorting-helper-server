@@ -8,4 +8,5 @@ import java.util.Optional;
 @Repository
 public interface DustbinRepository extends CrudRepository<Dustbin, Long> {
     Optional<Dustbin> findById(Long id);
+    Optional<Dustbin> findByName(String name);
 }
