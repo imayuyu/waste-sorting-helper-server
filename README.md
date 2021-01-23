@@ -2,7 +2,7 @@
 
 Back end for project "Research on campus garbage sorting and Recycling".
 
-See also: [waste-sorting-helper-weapp](https://github.com/charlie0129/waste-sorting-helper-weapp).
+See also: [waste-sorting-helper-client](https://github.com/charlie0129/waste-sorting-helper-client).
 
 *All APIs are for test purposes.*
 
@@ -94,7 +94,7 @@ See also: [waste-sorting-helper-weapp](https://github.com/charlie0129/waste-sort
        ]
        ```
 
-   - A dustbin ID that does not exist will cause `404 Not Found`.
+   - A user ID that does not exist will cause `404 Not Found`.
 
 5. Retrieve the credit of a user (not implemented).
 
@@ -131,6 +131,30 @@ See also: [waste-sorting-helper-weapp](https://github.com/charlie0129/waste-sort
      | longitude | Floating Point Value | Longitude of the dustbin. |
      
    - Returns the generated ID of the created dustbin.
+   
+8. Retrieve a list of dustbins.
+
+    - Use `HTTP GET` method at `/get-dustbin-list`
+
+    |  KEY   | VALUE | DESCRIPTION |
+    | :----: | :---: | :---------: |
+    | (null) |       |             |
+    
+    - The required list will be returned in JSON.
+    
+       ```json
+       [
+           {
+               "full": false,
+               "id": 1,
+               "latitude": 40.1564221,
+               "longitude": 116.283188,
+               "name": "BUPT S"
+           }
+       ]
+       ```
+   
+       
 
 ## How to run this project
 
