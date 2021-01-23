@@ -97,10 +97,10 @@ See also: [waste-sorting-helper-weapp](https://github.com/charlie0129/waste-sort
 
 2. Create a MySQL database
 
-   ```mssql
-   create database waste_sorting_helper_db
-   create user 'administrator'@'%' identified by 'pswd'
-   grant all on waste_sorting_helper_db.* to 'administrator'@'%'
+   ```mysql
+   create database waste_sorting_helper_db;
+   create user 'waste_sorting_helper_admin'@'%' identified by 'your_password';
+   grant all on waste_sorting_helper_db.* to 'waste_sorting_helper_admin'@'%';
    ```
 
 3. Run this project
