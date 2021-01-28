@@ -18,7 +18,7 @@ public class HTTPRequestController {
     @Autowired
     private DustbinRepository dustbinRepository;
 
-    @PostMapping("/add-user")
+    @PostMapping("/user")
     public @ResponseBody String addUser(@RequestParam(value = "id") Long id,
                                         @RequestParam(value = "name", defaultValue = "") String name) {
         Optional<User> referencedUser = userRepository.findById(id);
@@ -32,7 +32,7 @@ public class HTTPRequestController {
 
     }
 
-    @GetMapping("/get-user")
+    @GetMapping("/user")
     public @ResponseBody String getUser(@RequestParam(value = "id") Long id) {
         Optional<User> referencedUser = userRepository.findById(id);
         if(referencedUser.isPresent()) {
@@ -42,7 +42,7 @@ public class HTTPRequestController {
         }
     }
 
-    @PostMapping("/add-dustbin")
+    @PostMapping("/dustbin")
     public @ResponseBody Long addDustbin(@RequestParam(value = "name") String name,
                                          @RequestParam(value = "latitude") Double latitude,
                                          @RequestParam(value = "longitude") Double longitude) {
@@ -52,13 +52,13 @@ public class HTTPRequestController {
         return newDustbin.getId();
     }
 
-    @GetMapping("/get-dustbin-list")
+    @GetMapping("/dustbin-list")
     public @ResponseBody Iterable<Dustbin> getDustbinList() {
         return dustbinRepository.findAll();
     }
 
 
-    @PostMapping("/add-waste")
+    @PostMapping("/waste")
     public @ResponseBody String addWaste(@RequestParam(value = "id") Long id,
                                          @RequestParam(value = "category") WasteCategory category,
                                          @RequestParam(value = "weight") Double weight,
@@ -89,7 +89,7 @@ public class HTTPRequestController {
         }
     }
 
-    @GetMapping("/get-waste-list-top20")
+    @GetMapping("/waste-list-top20")
     public ArrayList<Waste> getWasteListTop(@RequestParam(value = "id") Long id) {
         Optional<User> referencedUser = userRepository.findById(id);
         if (referencedUser.isPresent()) {
@@ -99,7 +99,7 @@ public class HTTPRequestController {
         }
     }
 
-    @GetMapping("/get-waste-list-all")
+    @GetMapping("/waste-list-all")
     public ArrayList<Waste> getWasteListAll(@RequestParam(value = "id") Long id) {
         Optional<User> referencedUser = userRepository.findById(id);
         if (referencedUser.isPresent()) {
@@ -109,7 +109,7 @@ public class HTTPRequestController {
         }
     }
 
-    @GetMapping("/get-credit")
+    @GetMapping("/credit")
     public int getCredit(@RequestParam(value = "id") Long id) {
         Optional<User> referencedUser = userRepository.findById(id);
         if (referencedUser.isPresent()) {
@@ -119,7 +119,7 @@ public class HTTPRequestController {
         }
     }
 
-    @PostMapping("/report-incorrect-categorization")
+    @PostMapping("/incorrect-categorization")
     public String reportIncorrectCategorization(@RequestParam(value = "dustbinid") Long dustbinId,
                                          @RequestParam(value = "time") String submissionTime) {
         Optional<Dustbin> referencedDustbin = dustbinRepository.findById(dustbinId);
