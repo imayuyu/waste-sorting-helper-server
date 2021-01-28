@@ -2,11 +2,13 @@ package com.charliechiang.wastesortinghelperserver;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 
 @RestController
@@ -18,52 +20,69 @@ public class HTTPRequestController {
     @Autowired
     private DustbinRepository dustbinRepository;
 
-    @PostMapping("/user")
-    public @ResponseBody String addUser(@RequestParam(value = "id") Long id,
-                                        @RequestParam(value = "name", defaultValue = "") String name) {
+    // -----------------------------------
+
+    @PostMapping("/users")
+    public ResponseEntity<?> addUser(@RequestParam(value = "id") Long id,
+                                     @RequestParam(value = "name", defaultValue = "") String name) {
         Optional<User> referencedUser = userRepository.findById(id);
         if (referencedUser.isPresent()) {
             throw new ResourceConflictException();
         } else {
             User newUser = new User(id, name);
             userRepository.save(newUser);
-            return id + " " + name + " saved.";
+            return new ResponseEntity<>(HttpStatus.OK);
         }
 
     }
 
-    @GetMapping("/user")
-    public @ResponseBody String getUser(@RequestParam(value = "id") Long id) {
+    @GetMapping("/users/{id}")
+    public String getUser(@PathVariable(value = "id") Long id) {
         Optional<User> referencedUser = userRepository.findById(id);
-        if(referencedUser.isPresent()) {
+        if (referencedUser.isPresent()) {
             return referencedUser.get().getName();
         } else {
             throw new ResourceNotFoundException();
         }
     }
 
-    @PostMapping("/dustbin")
-    public @ResponseBody Long addDustbin(@RequestParam(value = "name") String name,
-                                         @RequestParam(value = "latitude") Double latitude,
-                                         @RequestParam(value = "longitude") Double longitude) {
+    // -----------------------------------
 
+    @PostMapping("/dustbins")
+    public Long addDustbin(@RequestParam(value = "name") String name,
+                           @RequestParam(value = "latitude") Double latitude,
+                           @RequestParam(value = "longitude") Double longitude) {
         Dustbin newDustbin = new Dustbin(name, latitude, longitude);
         dustbinRepository.save(newDustbin);
         return newDustbin.getId();
     }
 
-    @GetMapping("/dustbin-list")
-    public @ResponseBody Iterable<Dustbin> getDustbinList() {
+    @GetMapping("/dustbins")
+    public Iterable<Dustbin> getDustbinList() {
         return dustbinRepository.findAll();
     }
 
+    @PutMapping("/dustbins/{id}")
+    public ResponseEntity<?> updateDustbin(@PathVariable(value = "id") Long id,
+                                           @RequestParam(value = "isfull") Boolean isFull) {
+        Optional<Dustbin> referencedDustbin = dustbinRepository.findById(id);
+        if (referencedDustbin.isPresent()) {
+            referencedDustbin.get().setFull(isFull);
+            dustbinRepository.save(referencedDustbin.get());
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            throw new ResourceNotFoundException();
+        }
+    }
 
-    @PostMapping("/waste")
-    public @ResponseBody String addWaste(@RequestParam(value = "id") Long id,
-                                         @RequestParam(value = "category") WasteCategory category,
-                                         @RequestParam(value = "weight") Double weight,
-                                         @RequestParam(value = "dustbinid") Long dustbinId,
-                                         @RequestParam(value = "time", defaultValue = "") String submissionTime) {
+    // -----------------------------------
+
+    @PostMapping("/wastes")
+    public String addWaste(@RequestParam(value = "id") Long id,
+                           @RequestParam(value = "category") WasteCategory category,
+                           @RequestParam(value = "weight") Double weight,
+                           @RequestParam(value = "dustbinid") Long dustbinId,
+                           @RequestParam(value = "time", defaultValue = "") String submissionTime) {
         Optional<User> referencedUser = userRepository.findById(id);
         if (referencedUser.isPresent()) {
 
@@ -89,27 +108,29 @@ public class HTTPRequestController {
         }
     }
 
-    @GetMapping("/waste-list-top20")
-    public ArrayList<Waste> getWasteListTop(@RequestParam(value = "id") Long id) {
+
+    @GetMapping("/wastes")
+    public ArrayList<Waste> getWasteListAll(@RequestParam(value = "id") Long id,
+                                            @RequestParam(value = "n", defaultValue = "0") Long n) {
         Optional<User> referencedUser = userRepository.findById(id);
         if (referencedUser.isPresent()) {
-            return wasteRepository.findTop20ByUserOrderByIdDesc(referencedUser.get());
+            if (n == 20) {
+                return wasteRepository.findTop20ByUserOrderByIdDesc(referencedUser.get());
+            } else if (n == 0) {
+                return wasteRepository.findByUserOrderByIdDesc(referencedUser.get());
+            } else {
+                return new ArrayList<>(Arrays.asList(((Waste[]) Arrays.copyOfRange(wasteRepository.findByUserOrderByIdDesc(referencedUser.get()).toArray(),
+                                                                                   0,
+                                                                                   n.intValue()))));
+            }
         } else {
             throw new ResourceNotFoundException();
         }
     }
 
-    @GetMapping("/waste-list-all")
-    public ArrayList<Waste> getWasteListAll(@RequestParam(value = "id") Long id) {
-        Optional<User> referencedUser = userRepository.findById(id);
-        if (referencedUser.isPresent()) {
-            return wasteRepository.findByUserOrderByIdDesc(referencedUser.get());
-        } else {
-            throw new ResourceNotFoundException();
-        }
-    }
+    // -----------------------------------
 
-    @GetMapping("/credit")
+    @GetMapping("/credits")
     public int getCredit(@RequestParam(value = "id") Long id) {
         Optional<User> referencedUser = userRepository.findById(id);
         if (referencedUser.isPresent()) {
@@ -119,11 +140,13 @@ public class HTTPRequestController {
         }
     }
 
-    @PostMapping("/incorrect-categorization")
+    // -----------------------------------
+
+    @PostMapping("/incorrect-categorizations")
     public String reportIncorrectCategorization(@RequestParam(value = "dustbinid") Long dustbinId,
-                                         @RequestParam(value = "time") String submissionTime) {
+                                                @RequestParam(value = "time") String submissionTime) {
         Optional<Dustbin> referencedDustbin = dustbinRepository.findById(dustbinId);
-        if(referencedDustbin.isPresent()) {
+        if (referencedDustbin.isPresent()) {
             LocalDateTime submissionLocalDateTime;
             if (submissionTime.equals("")) {
                 submissionLocalDateTime = LocalDateTime.now();
@@ -149,7 +172,6 @@ public class HTTPRequestController {
         }
 
         throw new ResourceNotFoundException();
-
     }
 
 
@@ -157,7 +179,9 @@ public class HTTPRequestController {
 
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
-class ResourceNotFoundException extends RuntimeException {}
+class ResourceNotFoundException extends RuntimeException {
+}
 
 @ResponseStatus(HttpStatus.CONFLICT)
-class ResourceConflictException extends RuntimeException {}
+class ResourceConflictException extends RuntimeException {
+}
