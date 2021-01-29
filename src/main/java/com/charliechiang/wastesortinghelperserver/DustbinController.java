@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -21,15 +22,21 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 public class DustbinController {
     private final DustbinRepository dustbinRepository;
+    private final WasteRepository wasteRepository;
+    private final WasteModelAssembler wasteModelAssembler;
     private final DustbinModelAssembler dustbinModelAssembler;
 
     public DustbinController(DustbinRepository dustbinRepository,
-                          DustbinModelAssembler dustbinModelAssembler) {
+                             WasteRepository wasteRepository,
+                             WasteModelAssembler wasteModelAssembler,
+                             DustbinModelAssembler dustbinModelAssembler) {
         this.dustbinRepository = dustbinRepository;
+        this.wasteRepository = wasteRepository;
+        this.wasteModelAssembler = wasteModelAssembler;
         this.dustbinModelAssembler = dustbinModelAssembler;
     }
 
-    @GetMapping("/dustbins")
+    @GetMapping("/api/dustbins")
     public CollectionModel<EntityModel<Dustbin>> getDustbinAll() {
 
         List<EntityModel<Dustbin>> dustbins =
@@ -38,21 +45,23 @@ public class DustbinController {
                                  .map(dustbinModelAssembler::toModel)
                                  .collect(Collectors.toList());
 
-        return CollectionModel.of(dustbins, linkTo(methodOn(DustbinController.class).getDustbinAll())
-                .withSelfRel());
+        return CollectionModel.of(dustbins,
+                                  linkTo(methodOn(DustbinController.class).getDustbinAll())
+                                          .withSelfRel());
     }
 
-    @GetMapping("/dustbins/{id}")
+    @GetMapping("/api/dustbins/{id}")
     public EntityModel<Dustbin> getDustbinSingle(@PathVariable Long id) {
 
         Dustbin referencedDustbin =
                 dustbinRepository.findById(id)
-                                 .orElseThrow(() -> new ResourceNotFoundException());
+                                 .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID=" + id + " could " +
+                                                                                  "not be found."));
 
         return dustbinModelAssembler.toModel(referencedDustbin);
     }
 
-    @PostMapping("/dustbins")
+    @PostMapping("/api/dustbins")
     public ResponseEntity<?> addDustbin(@RequestBody Dustbin newDustbin) {
 
         EntityModel<Dustbin> entityModel =
@@ -63,7 +72,7 @@ public class DustbinController {
                              .body(entityModel);
     }
 
-    @PutMapping("/dustbins/{id}")
+    @PutMapping("/api/dustbins/{id}")
     public ResponseEntity<?> updateDustbin(@PathVariable(value = "id") Long id,
                                            @RequestBody Dustbin newDustbin) {
 
@@ -76,10 +85,9 @@ public class DustbinController {
                                      dustbin.setFull(newDustbin.getFull());
                                      return dustbinRepository.save(dustbin);
                                  })
-                                 .orElseGet(() -> {
-                                     newDustbin.setId(id);
-                                     return dustbinRepository.save(newDustbin);
-                                 });
+                                 .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
+                                                                                  + id
+                                                                                  + " could not be found."));
 
         EntityModel<Dustbin> entityModel = dustbinModelAssembler.toModel(updatedDustbin);
 
@@ -88,11 +96,48 @@ public class DustbinController {
                              .body(entityModel);
     }
 
-    @DeleteMapping("/dustbins/{id}")
+    @DeleteMapping("/api/dustbins/{id}")
     public ResponseEntity<?> deleteDustbin(@PathVariable Long id) {
 
         dustbinRepository.deleteById(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/api/dustbins/{id}/full")
+    public ResponseEntity<?> updateDustbinFull(@PathVariable Long id,
+                                               @RequestParam(value = "isfull") Boolean isFull) {
+
+        Dustbin referencedDustbin = dustbinRepository.findById(id)
+                                                     .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
+                                                                                                      + id
+                                                                                                      + " could not " +
+                                                                                                      "be found."));
+
+        referencedDustbin.setFull(isFull);
+
+        EntityModel<Dustbin> entityModel =
+                dustbinModelAssembler.toModel(dustbinRepository.save(referencedDustbin));
+
+        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
+                                                 .toUri())
+                             .body(entityModel);
+    }
+
+    @GetMapping("/api/dustbins/{id}/wastes")
+    public CollectionModel<EntityModel<Waste>> getWasteAllByDustbin(@PathVariable Long id) {
+
+        List<EntityModel<Waste>> wastes =
+                wasteRepository.findByDustbinOrderByIdDesc(dustbinRepository.findById(id)
+                                                                            .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
+                                                                                                                             + id
+                                                                                                                             + " could not be found.")))
+                               .stream()
+                               .map(wasteModelAssembler::toModel)
+                               .collect(Collectors.toList());
+
+        return CollectionModel.of(wastes,
+                                  linkTo(methodOn(DustbinController.class).getWasteAllByDustbin(id))
+                                          .withSelfRel());
     }
 }
