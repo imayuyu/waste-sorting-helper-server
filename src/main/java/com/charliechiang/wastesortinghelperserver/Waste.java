@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "waste")
 public class Waste {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private WasteCategory category;
     private LocalDateTime time;
