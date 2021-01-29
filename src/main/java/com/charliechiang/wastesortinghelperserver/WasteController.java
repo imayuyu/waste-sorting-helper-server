@@ -1,6 +1,5 @@
 package com.charliechiang.wastesortinghelperserver;
 
-import org.hibernate.hql.internal.ast.tree.MethodNode;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -9,15 +8,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -42,34 +40,30 @@ public class WasteController {
     }
 
     @PostMapping("/api/wastes")
-    public ResponseEntity<?> addWaste(@RequestParam(value = "userid") Long userId,
-                                      @RequestParam(value = "category") WasteCategory category,
-                                      @RequestParam(value = "weight") Double weight,
-                                      @RequestParam(value = "dustbinid") Long dustbinId,
-                                      @RequestParam(value = "time", defaultValue = "") String submissionTime) {
+    public ResponseEntity<?> addWaste(@RequestBody WasteForm wasteForm) {
 
-        User referencedUser = userRepository.findById(userId)
+        User referencedUser = userRepository.findById(wasteForm.getUserId())
                                             .orElseThrow(() -> new ResourceNotFoundException("User with ID="
-                                                                                             + userId
+                                                                                             + wasteForm.getUserId()
                                                                                              + " could not be found."));
-        Dustbin referencedDustbin = dustbinRepository.findById(dustbinId)
+        Dustbin referencedDustbin = dustbinRepository.findById(wasteForm.getDustbinId())
                                                      .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
-                                                                                                      + dustbinId
+                                                                                                      + wasteForm.getDustbinId()
                                                                                                       + " could not be found."));
 
         LocalDateTime submissionLocalDateTime;
 
-        if (submissionTime.equals("")) {
+        if (wasteForm.getTime().equals("")) {
             submissionLocalDateTime = LocalDateTime.now();
         } else {
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            submissionLocalDateTime = LocalDateTime.parse(submissionTime, dateTimeFormatter);
+            submissionLocalDateTime = LocalDateTime.parse(wasteForm.getTime(), dateTimeFormatter);
         }
 
         EntityModel<Waste> entityModel =
                 wasteModelAssembler.toModel(wasteRepository.save(new Waste(referencedUser,
-                                                                           category,
-                                                                           weight,
+                                                                           wasteForm.getCategory(),
+                                                                           wasteForm.getWeight(),
                                                                            referencedDustbin,
                                                                            submissionLocalDateTime)));
 
@@ -101,8 +95,6 @@ public class WasteController {
                                   linkTo(methodOn(WasteController.class).getWasteAll())
                                           .withSelfRel());
     }
-
-
 
 
     @PostMapping("/api/wastes/actions/report-incorrect-categorization")
@@ -137,5 +129,95 @@ public class WasteController {
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+}
+
+
+class WasteForm {
+    private WasteCategory category;
+    private String time = "";
+    private Long userId;
+    private Double weight;
+    private Long dustbinId;
+    private Boolean isCorrectlyCategorized;
+
+    public WasteForm() {
+
+    }
+
+    public WasteForm(Long userId,
+                     Long dustbinId,
+                     Double weight,
+                     WasteCategory category,
+                     String time,
+                     Boolean isCorrectlyCategorized
+                    ) {
+        this.userId = userId;
+        this.category = category;
+        this.time = time;
+        this.weight = weight;
+        this.dustbinId = dustbinId;
+        this.isCorrectlyCategorized = isCorrectlyCategorized;
+    }
+
+    public WasteForm(Long userId,
+                     Long dustbinId,
+                     Double weight,
+                     WasteCategory category,
+                     Boolean isCorrectlyCategorized
+                    ) {
+        this.userId = userId;
+        this.category = category;
+        this.weight = weight;
+        this.dustbinId = dustbinId;
+        this.isCorrectlyCategorized = isCorrectlyCategorized;
+    }
+
+    public WasteCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(WasteCategory category) {
+        this.category = category;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
+
+    public Long getDustbinId() {
+        return dustbinId;
+    }
+
+    public void setDustbinId(Long dustbinId) {
+        this.dustbinId = dustbinId;
+    }
+
+    public Boolean getCorrectlyCategorized() {
+        return isCorrectlyCategorized;
+    }
+
+    public void setCorrectlyCategorized(Boolean correctlyCategorized) {
+        isCorrectlyCategorized = correctlyCategorized;
     }
 }

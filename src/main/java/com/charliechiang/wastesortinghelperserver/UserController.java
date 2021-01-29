@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,16 +40,15 @@ public class UserController {
 
 
     @PostMapping("/api/users")
-    public ResponseEntity<?> addUser(@RequestParam(value = "id") Long id,
-                                     @RequestParam(value = "name", defaultValue = "") String name) {
+    public ResponseEntity<?> addUser(@RequestBody User newUser) {
 
-        Optional<User> referencedUser = userRepository.findById(id);
+        Optional<User> referencedUser = userRepository.findById(newUser.getId());
 
         if (referencedUser.isPresent()) {
-            throw new ResourceConflictException("User with ID=" + id + " already exists.");
+            throw new ResourceConflictException("User with ID=" + newUser.getId() + " already exists.");
         } else {
             EntityModel<User> entityModel =
-                    userModelAssembler.toModel(userRepository.save(new User(id, name)));
+                    userModelAssembler.toModel(userRepository.save(newUser));
 
             return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
                                                      .toUri())

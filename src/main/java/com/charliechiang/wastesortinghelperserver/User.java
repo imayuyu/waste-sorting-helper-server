@@ -10,7 +10,7 @@ public class User {
     @Id
     private Long id;
     private String name;
-    private int score;
+    private int score = 0;
 
     public User() {
 
