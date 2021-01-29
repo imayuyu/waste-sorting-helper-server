@@ -1,12 +1,12 @@
 package com.charliechiang.wastesortinghelperserver;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 
 @Repository
-public interface WasteRepository extends CrudRepository<Waste, Long> {
+public interface WasteRepository extends JpaRepository<Waste, Long> {
     ArrayList<Waste> findTop5ByDustbinOrderByIdDesc(Dustbin dustbin);
     ArrayList<Waste> findByUserOrderByIdDesc(User user);
     ArrayList<Waste> findTop20ByUserOrderByIdDesc(User user);
