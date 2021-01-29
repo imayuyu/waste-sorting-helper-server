@@ -3,7 +3,6 @@ package com.charliechiang.wastesortinghelperserver;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "dustbin")
 public class Dustbin {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
