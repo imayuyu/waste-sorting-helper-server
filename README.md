@@ -26,9 +26,7 @@ See also: [waste-sorting-helper-client](https://github.com/charlie0129/waste-sor
 
 ## HTTP request specifications:
 
-Most APIs are [`RESTful`](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs.
-
-`http://[host]:[port]/{service name}/{resource}`
+Most APIs are [`RESTful`](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs like this `http://[host]:[port]/{service name}/{resource}`.
 
 ### Dustbin related APIs
 
@@ -104,7 +102,7 @@ Most APIs are [`RESTful`](https://en.wikipedia.org/wiki/Representational_state_t
         
 
 - `POST /api/dustbins/{dustbinId}/full`: Mark whether the dustbin is full
-    
+  
     - Required URL parameters
     
         | KEY    | TYPE    | DESCRIPTION |
