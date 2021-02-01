@@ -10,7 +10,7 @@ public class User {
     @Id
     private Long id;
     private String name;
-    private int score = 0;
+    private int credit = 0;
 
     public User() {
 
@@ -37,11 +37,11 @@ public class User {
         this.name = name;
     }
 
-    public int getScore() {
-        return score;
+    public int getCredit() {
+        return credit;
     }
 
-    public void setScore(int score) {
-        this.score = score;
+    public void setCredit(int score) {
+        this.credit = score;
     }
 }
