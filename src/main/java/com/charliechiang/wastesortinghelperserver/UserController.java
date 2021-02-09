@@ -1,5 +1,8 @@
 package com.charliechiang.wastesortinghelperserver;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -130,6 +134,27 @@ public class UserController {
         }
 
         return CollectionModel.of(wastes);
+    }
+
+    @GetMapping("/api/users/{userid}/credit")
+    public int getCreditByUser(@PathVariable(value = "userid") Long userId) {
+
+        User referencedUser = userRepository.findById(userId)
+                                            .orElseThrow(() -> new ResourceNotFoundException("User with ID="
+                                                                                             + userId
+                                                                                             + " could not be found."));
+
+        ArrayList<Waste> correctlyCategorizedWastes = wasteRepository.findByUserAndIsCorrectlyCategorizedIsTrue(referencedUser);
+
+        int credit = correctlyCategorizedWastes.size();
+
+        if (credit!= referencedUser.getCredit()) {
+            referencedUser.setCredit(credit);
+            userRepository.save(referencedUser);
+        }
+
+
+        return credit;
     }
 
 }

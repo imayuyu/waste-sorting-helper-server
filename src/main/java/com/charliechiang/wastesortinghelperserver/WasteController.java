@@ -150,8 +150,7 @@ class WasteForm {
                      Double weight,
                      WasteCategory category,
                      String time,
-                     Boolean isCorrectlyCategorized
-                    ) {
+                     Boolean isCorrectlyCategorized) {
         this.userId = userId;
         this.category = category;
         this.time = time;

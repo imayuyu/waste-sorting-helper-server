@@ -12,5 +12,6 @@ public interface WasteRepository extends JpaRepository<Waste, Long> {
     ArrayList<Waste> findByUserOrderByIdDesc(User user);
     ArrayList<Waste> findTop20ByUserOrderByIdDesc(User user);
     ArrayList<Waste> findByCategory(WasteCategory category);
+    ArrayList<Waste> findByUserAndIsCorrectlyCategorizedIsTrue(User user);
     Waste findById(long id);
 }
