@@ -21,17 +21,22 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class DustbinController {
+
     private final DustbinRepository dustbinRepository;
     private final WasteRepository wasteRepository;
+    private final UserRepository userRepository;
+
     private final WasteModelAssembler wasteModelAssembler;
     private final DustbinModelAssembler dustbinModelAssembler;
 
     public DustbinController(DustbinRepository dustbinRepository,
                              WasteRepository wasteRepository,
+                             UserRepository userRepository,
                              WasteModelAssembler wasteModelAssembler,
                              DustbinModelAssembler dustbinModelAssembler) {
         this.dustbinRepository = dustbinRepository;
         this.wasteRepository = wasteRepository;
+        this.userRepository = userRepository;
         this.wasteModelAssembler = wasteModelAssembler;
         this.dustbinModelAssembler = dustbinModelAssembler;
     }
@@ -141,31 +146,42 @@ public class DustbinController {
                                           .withSelfRel());
     }
 
-    @PostMapping("/api/dustbins/{id}/request")
-    public ServerRequest sendOpenLidRequest(@PathVariable Long id,
+    @PostMapping("/api/dustbins/{id}/requests")
+    public ResponseEntity<?> sendOpenLidRequest(@PathVariable Long id,
                                                 @RequestBody LidOpenRequestForm lidOpenRequestForm) {
 
+        userRepository.findById(lidOpenRequestForm.getUserId())
+                      .orElseThrow(() -> new ResourceNotFoundException("User with ID="
+                                                                       + lidOpenRequestForm.getUserId()
+                                                                       + " could not be found."));
 
-        ServerRequest generatedRequest = ServerRequest.generateNewRequest(lidOpenRequestForm.userId,
-                                                                          lidOpenRequestForm.dustbinId);
+        ServerRequest generatedRequest = ServerRequest.generateNewRequest(lidOpenRequestForm.getUserId(),
+                                                                          lidOpenRequestForm.getDustbinId());
         try {
             WebSocketController.sendRequest(generatedRequest);
         } catch (Exception ex) {
             throw new ResourceNotFoundException(ex.getMessage());
         }
 
-        EntityModel<ServerRequest> entityModel = EntityModel.of(generatedRequest);
+        EntityModel<ServerRequest> entityModel = EntityModel.of(generatedRequest,
+                                                                linkTo(methodOn(DustbinController.class).getRequestSingle(generatedRequest.getDustbinId(),
+                                                                                                                          generatedRequest.getRequestId())).withSelfRel());
 
-        return generatedRequest;
+        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
-//    @GetMapping("/api/dustbins/{dustbinId}/request/{requestId}")
-//    public EntityModel<ServerRequest> getRequestSingle(@PathVariable)
+    @GetMapping("/api/dustbins/{dustbinId}/requests/{requestId}")
+    public EntityModel<ServerRequest> getRequestSingle(@PathVariable Long dustbinId,
+                                                       @PathVariable Long requestId) {
+
+        return EntityModel.of(WebSocketController.getRequest(dustbinId, requestId));
+    }
+
 }
 
 class LidOpenRequestForm {
-    Long dustbinId;
-    Long userId;
+    private Long dustbinId;
+    private Long userId;
 
     public LidOpenRequestForm(Long dustbinId, Long userId) {
         this.dustbinId = dustbinId;
