@@ -4,13 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.service.Service;
-import org.springframework.boot.jackson.JsonObjectDeserializer;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 
-import javax.websocket.EncodeException;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -19,7 +14,6 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,8 +37,10 @@ public class WebSocketController {
     @OnOpen
     public void onOpen(Session session,
                        @PathParam("dustbinId") Long dustbinId) {
+
         this.session = session;
         this.dustbinId = dustbinId;
+
         if (connectionMap.containsKey(dustbinId)) {
             connectionMap.remove(dustbinId);
             connectionMap.put(dustbinId, this);
@@ -58,6 +54,7 @@ public class WebSocketController {
 
     @OnClose
     public void onClose() {
+
         if (connectionMap.containsKey(dustbinId)) {
             connectionMap.remove(dustbinId);
             onlineDustbinCount.decrementAndGet();
@@ -68,6 +65,7 @@ public class WebSocketController {
 
     @OnMessage
     public void onMessage(String message, Session session) {
+
         Integer type = null;
         Long requestId = null;
         Long userId = null;
@@ -101,11 +99,14 @@ public class WebSocketController {
 
     @OnError
     public void onError(Session session, Throwable throwable) {
+
         logger.error("Connection error: dustbinId=" + this.dustbinId + ", message=" + throwable.getMessage());
         throwable.printStackTrace();
     }
 
+
     public static void sendRequest(ServerRequest serverRequest) throws ResourceNotFoundException, IOException {
+
         if (!connectionMap.containsKey(serverRequest.getDustbinId())) {
             throw new ResourceNotFoundException("Dustbin with ID=" + serverRequest.getDustbinId() + " could not be connected.");
         }
@@ -119,6 +120,7 @@ public class WebSocketController {
     }
 
     public static ServerRequest getRequest(Long dustbinId, Long requestId) throws ResourceNotFoundException {
+
         if (!connectionMap.containsKey(dustbinId)) {
             throw new ResourceNotFoundException("Dustbin with ID=" + dustbinId + " could not be found.");
         }
@@ -148,6 +150,7 @@ class ServerRequest {
 
     public static ServerRequest generateNewRequest(Long userId,
                                                    Long dustbinId) {
+
         return new ServerRequest(2,
                                  System.currentTimeMillis(),
                                  userId,
@@ -160,6 +163,7 @@ class ServerRequest {
                          Long userId,
                          Long dustbinId,
                          String description) {
+
         this.type = type;
         this.requestId = requestId;
         this.userId = userId;
