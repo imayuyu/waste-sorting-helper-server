@@ -140,4 +140,51 @@ public class DustbinController {
                                   linkTo(methodOn(DustbinController.class).getWasteAllByDustbin(id))
                                           .withSelfRel());
     }
+
+    @PostMapping("/api/dustbins/{id}/request")
+    public ServerRequest sendOpenLidRequest(@PathVariable Long id,
+                                                @RequestBody LidOpenRequestForm lidOpenRequestForm) {
+
+
+        ServerRequest generatedRequest = ServerRequest.generateNewRequest(lidOpenRequestForm.userId,
+                                                                          lidOpenRequestForm.dustbinId);
+        try {
+            WebSocketController.sendRequest(generatedRequest);
+        } catch (Exception ex) {
+            throw new ResourceNotFoundException(ex.getMessage());
+        }
+
+        EntityModel<ServerRequest> entityModel = EntityModel.of(generatedRequest);
+
+        return generatedRequest;
+    }
+
+//    @GetMapping("/api/dustbins/{dustbinId}/request/{requestId}")
+//    public EntityModel<ServerRequest> getRequestSingle(@PathVariable)
+}
+
+class LidOpenRequestForm {
+    Long dustbinId;
+    Long userId;
+
+    public LidOpenRequestForm(Long dustbinId, Long userId) {
+        this.dustbinId = dustbinId;
+        this.userId = userId;
+    }
+
+    public Long getDustbinId() {
+        return dustbinId;
+    }
+
+    public void setDustbinId(Long dustbinId) {
+        this.dustbinId = dustbinId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 }
