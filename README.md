@@ -30,12 +30,14 @@ Most APIs are [`RESTful`](https://en.wikipedia.org/wiki/Representational_state_t
 
 ### Dustbin related APIs
 
-| Resources                          | POST                             | GET                                | PUT               | DELETE             |
-| ---------------------------------- | -------------------------------- | ---------------------------------- | ----------------- | ------------------ |
-| `/api/dustbins`                    | Add a dustbin                    | List dustbins                      | -                 | -                  |
-| `/api/dustbins/{dustbinId}`        | -                                | Identify the dustbin               | Replace a dustbin | Delete the dustbin |
-| `/api/dustbins/{dustbinId}/full`   | Mark whether the dustbin is full | -                                  | -                 | -                  |
-| `/api/dustbins/{dustbinId}/wastes` | -                                | List wastes related to the dustbin | -                 | -                  |
+| Resources                                        | POST                             | GET                                | PUT               | DELETE             |
+| ------------------------------------------------ | -------------------------------- | ---------------------------------- | ----------------- | ------------------ |
+| `/api/dustbins`                                  | Add a dustbin                    | List dustbins                      | -                 | -                  |
+| `/api/dustbins/{dustbinId}`                      | -                                | Identify the dustbin               | Replace a dustbin | Delete the dustbin |
+| `/api/dustbins/{dustbinId}/full`                 | Mark whether the dustbin is full | -                                  | -                 | -                  |
+| `/api/dustbins/{dustbinId}/wastes`               | -                                | List wastes related to the dustbin | -                 | -                  |
+| `/api/dustbins/{dustbinId}/requests`             | Request lid-open action          | -                                  | -                 | -                  |
+| `/api/dustbins/{dustbinId}/requests/{requestId}` | -                                | Get lid-open request info          | -                 | -                  |
 
 ### User related APIs
 
