@@ -73,6 +73,7 @@ public class WebSocketController {
         Long userId = null;
         Long dustbinId = null;
         String description = null;
+
         if (!message.isEmpty()) {
             try {
                 JSONObject jsonObject = JSON.parseObject(message);
@@ -87,16 +88,15 @@ public class WebSocketController {
             }
         }
 
+
         if (type == null || requestId == null || userId == null || dustbinId == null || description == null) {
             return;
         }
 
         ServerRequest serverRequest = new ServerRequest(type, requestId, userId, dustbinId, description);
 
-        if (messageHistory.containsKey(serverRequest.getRequestId())) {
-            messageHistory.remove(serverRequest.getRequestId());
-            messageHistory.put(serverRequest.getRequestId(), serverRequest);
-        }
+        messageHistory.remove(serverRequest.getRequestId());
+        messageHistory.put(serverRequest.getRequestId(), serverRequest);
     }
 
     @OnError
@@ -112,18 +112,24 @@ public class WebSocketController {
 
         WebSocketController referencedDustbinWS = connectionMap.get(serverRequest.getDustbinId());
         referencedDustbinWS.session.getBasicRemote().sendText(JSON.toJSONString(serverRequest));
-        if (referencedDustbinWS.messageHistory.containsKey(serverRequest.getRequestId())) {
-            referencedDustbinWS.messageHistory.remove(serverRequest.getRequestId());
-            referencedDustbinWS.messageHistory.put(serverRequest.getRequestId(), serverRequest);
-        }
+
+        referencedDustbinWS.messageHistory.remove(serverRequest.getRequestId());
+        referencedDustbinWS.messageHistory.put(serverRequest.getRequestId(), serverRequest);
+
     }
 
-    public int getRequestStatus(Long requestId) {
-        if (!messageHistory.containsKey(requestId)) {
-            return -1;
+    public static ServerRequest getRequest(Long dustbinId, Long requestId) throws ResourceNotFoundException {
+        if (!connectionMap.containsKey(dustbinId)) {
+            throw new ResourceNotFoundException("Dustbin with ID=" + dustbinId + " could not be found.");
         }
 
-        return messageHistory.get(requestId).getType();
+        WebSocketController referencedDustbinWS = connectionMap.get(dustbinId);
+
+        if (!referencedDustbinWS.messageHistory.containsKey(requestId)) {
+            throw new ResourceNotFoundException("Request with ID=" + requestId + " could not be found.");
+        }
+
+        return referencedDustbinWS.messageHistory.get(requestId);
     }
 }
 
@@ -134,11 +140,11 @@ class ServerRequest {
     //            | 0    | request has been successfully handled |
     //            | 1    | request cannot be fulfilled           |
     //            | 2    | request has not been processed        |
-    Integer type;
-    Long requestId;
-    Long userId;
-    Long dustbinId;
-    String description;
+    private Integer type;
+    private Long requestId;
+    private Long userId;
+    private Long dustbinId;
+    private String description;
 
     public static ServerRequest generateNewRequest(Long userId,
                                                    Long dustbinId) {
