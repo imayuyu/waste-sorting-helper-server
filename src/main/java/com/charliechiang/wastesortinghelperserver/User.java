@@ -10,7 +10,7 @@ public class User {
     @Id
     private Long id;
     private String name;
-    private int credit = 0;
+    private Integer credit = 0;
 
     public User() {
 
@@ -41,7 +41,7 @@ public class User {
         return credit;
     }
 
-    public void setCredit(int credit) {
+    public void setCredit(Integer credit) {
         this.credit = credit;
     }
 }

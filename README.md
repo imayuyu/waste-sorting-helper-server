@@ -234,5 +234,44 @@ Most APIs are [`RESTful`](https://en.wikipedia.org/wiki/Representational_state_t
 
    `mvn spring-boot:run`
 
-   Test the HTTP requests at port `8080`.
+   Test the HTTP requests at port `10883`.
    
+
+
+
+## 垃圾桶连接说明
+
+- 扫码扔垃圾：通过 `WebSocket` 连接 `ws://example.com:10883/api/ws/dustbins/{dustbinId}` ，开盖流程如下
+
+    1. 等待服务器请求
+
+    2. 服务器在用户扫码后需要开盖时会通过 `WebSocket` 发送信息
+
+        示例：
+
+        ```json
+        {
+        // | type | Description                           |
+        // | ---- | ------------------------------------- |
+        // | 0    | request has been successfully handled |
+        // | 1    | request cannot be fulfilled           |
+        // | 2    | request has not been processed        |
+           "type" : 2,
+           "requestId" : 1613911143932,
+           "userId" : 1,
+           "description" : "(Auto-generated) Lid-open",
+           "dustbinId" : 1
+        }
+        ```
+
+    3. 垃圾桶在执行完开盖操作后，将服务器传回请求中 `type` 字段改为 `0` (成功) 或 `1` (失败) 后发送回服务器（其余字段不变）
+
+    4. 垃圾投放完成后，通过 `POST /api/wastes` 传输相关信息（`userId` 已在 `WebSocket` 信息中包含）
+
+    5. 重复以上流程
+
+- IC卡扔垃圾
+    1. 垃圾投放完成后，通过 `POST /api/wastes` 传输相关信息
+
+- 报告分类错误
+    1. 通过 `POST /api/wastes/actions/report-incorrect-categorization` 传输相关信息
