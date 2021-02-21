@@ -41,7 +41,7 @@ public class User {
         return credit;
     }
 
-    public void setCredit(int score) {
-        this.credit = score;
+    public void setCredit(int credit) {
+        this.credit = credit;
     }
 }
