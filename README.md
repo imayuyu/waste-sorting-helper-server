@@ -250,12 +250,12 @@ Most APIs are [`RESTful`](https://en.wikipedia.org/wiki/Representational_state_t
         示例：
 
         ```json
-        {
         // | type | Description                           |
         // | ---- | ------------------------------------- |
         // | 0    | request has been successfully handled |
         // | 1    | request cannot be fulfilled           |
         // | 2    | request has not been processed        |
+        {
            "type" : 2,
            "requestId" : 1613911143932,
            "userId" : 1,
