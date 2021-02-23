@@ -28,7 +28,7 @@ See also: [waste-sorting-helper-client](https://github.com/charlie0129/waste-sor
 
 Most APIs are [`RESTful`](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs like this `http://[host]:[port]/{service name}/{resource}`.
 
-### Dustbin related APIs
+### Dustbin-Related APIs
 
 | Resources                                        | POST                             | GET                                | PUT               | DELETE             |
 | ------------------------------------------------ | -------------------------------- | ---------------------------------- | ----------------- | ------------------ |
@@ -39,7 +39,7 @@ Most APIs are [`RESTful`](https://en.wikipedia.org/wiki/Representational_state_t
 | `/api/dustbins/{dustbinId}/requests`             | Request lid-open action          | -                                  | -                 | -                  |
 | `/api/dustbins/{dustbinId}/requests/{requestId}` | -                                | Get lid-open request info          | -                 | -                  |
 
-### User related APIs
+### User-Related APIs
 
 | Resources                    | POST       | GET                             | PUT            | DELETE          |
 | ---------------------------- | ---------- | ------------------------------- | -------------- | --------------- |
@@ -47,7 +47,7 @@ Most APIs are [`RESTful`](https://en.wikipedia.org/wiki/Representational_state_t
 | `/api/users/{userId}`        | -          | Identify the user               | Replace a user | Delete the user |
 | `/api/users/{userId}/wastes` | -          | List wastes related to the user | -              | -               |
 
-### Waste related APIs
+### Waste-Related APIs
 
 | Resources                                             | POST                               | GET                | PUT  | DELETE |
 | ----------------------------------------------------- | ---------------------------------- | ------------------ | ---- | ------ |
@@ -271,7 +271,9 @@ Most APIs are [`RESTful`](https://en.wikipedia.org/wiki/Representational_state_t
     5. 重复以上流程
 
 - IC卡扔垃圾
-    1. 垃圾投放完成后，通过 `POST /api/wastes` 传输相关信息
-
+    
+1. 垃圾投放完成后，通过 `POST /api/wastes` 传输相关信息
+    
 - 报告分类错误
+    
     1. 通过 `POST /api/wastes/actions/report-incorrect-categorization` 传输相关信息
