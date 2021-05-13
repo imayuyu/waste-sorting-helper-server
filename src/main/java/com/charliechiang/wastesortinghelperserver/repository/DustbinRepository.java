@@ -1,5 +1,6 @@
-package com.charliechiang.wastesortinghelperserver;
+package com.charliechiang.wastesortinghelperserver.repository;
 
+import com.charliechiang.wastesortinghelperserver.model.Dustbin;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 

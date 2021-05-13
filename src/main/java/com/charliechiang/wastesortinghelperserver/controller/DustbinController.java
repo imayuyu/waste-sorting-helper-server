@@ -1,5 +1,13 @@
-package com.charliechiang.wastesortinghelperserver;
+package com.charliechiang.wastesortinghelperserver.controller;
 
+import com.charliechiang.wastesortinghelperserver.model.Dustbin;
+import com.charliechiang.wastesortinghelperserver.model.DustbinModelAssembler;
+import com.charliechiang.wastesortinghelperserver.repository.DustbinRepository;
+import com.charliechiang.wastesortinghelperserver.exception.ResourceNotFoundException;
+import com.charliechiang.wastesortinghelperserver.repository.UserRepository;
+import com.charliechiang.wastesortinghelperserver.model.Waste;
+import com.charliechiang.wastesortinghelperserver.model.WasteModelAssembler;
+import com.charliechiang.wastesortinghelperserver.repository.WasteRepository;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;

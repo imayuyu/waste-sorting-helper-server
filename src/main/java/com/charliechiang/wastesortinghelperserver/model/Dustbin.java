@@ -1,4 +1,4 @@
-package com.charliechiang.wastesortinghelperserver;
+package com.charliechiang.wastesortinghelperserver.model;
 
 import javax.persistence.*;
 
