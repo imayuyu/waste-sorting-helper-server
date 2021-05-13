@@ -2,6 +2,7 @@ package com.charliechiang.wastesortinghelperserver.controller;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
+import com.charliechiang.wastesortinghelperserver.config.CreditUpdateSettings;
 import com.charliechiang.wastesortinghelperserver.exception.ResourceNotFoundException;
 import com.charliechiang.wastesortinghelperserver.model.School;
 import com.charliechiang.wastesortinghelperserver.repository.SchoolRepository;
@@ -45,8 +46,6 @@ public class UserController {
 
     private final LocalDateTime lastUpdatedRankingTime = LocalDateTime.of(1970, 1, 1, 1, 1);
 
-    private final long rankingUpdateDelay = 1;
-    private final TemporalUnit rankingUpdateDelayUnit = ChronoUnit.MINUTES;
     private int collegeStudentCountCache;
 
     public UserController(UserRepository userRepository,
@@ -233,7 +232,8 @@ public class UserController {
     }
 
     public void updateRanking() {
-        if (lastUpdatedRankingTime.plus(rankingUpdateDelay, rankingUpdateDelayUnit).isAfter(LocalDateTime.now())) {
+        if (lastUpdatedRankingTime.plus(CreditUpdateSettings.RANKING_UPDATE_DELAY, CreditUpdateSettings.RANKING_UPDATE_DELAY_UNIT)
+                                  .isAfter(LocalDateTime.now())) {
             return;
         }
 
