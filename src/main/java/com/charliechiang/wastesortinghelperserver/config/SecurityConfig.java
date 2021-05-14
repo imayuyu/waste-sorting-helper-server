@@ -28,6 +28,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain springWebFilterChain(HttpSecurity http,
                                              JwtTokenProvider tokenProvider) throws Exception {
+
         return http
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
@@ -44,7 +45,7 @@ public class SecurityConfig {
                                            // Admin only - delete dustbins
                                            .antMatchers(HttpMethod.DELETE, "/api/v1/dustbins/**").hasRole("ADMIN")
                                            // Permit All - allow dustbins to change whether it is full
-                                           .antMatchers(HttpMethod.POST,"/api/v1/dustbins/*/full").permitAll()
+                                           .antMatchers(HttpMethod.POST, "/api/v1/dustbins/*/full").permitAll()
 
                                            // ---------- SchoolController ----------
                                            // Admin only - add schools
@@ -58,13 +59,13 @@ public class SecurityConfig {
 
                                            // ---------- UserController ----------
                                            // Admin only - get user list
-                                           .antMatchers(HttpMethod.GET,"/api/v1/users").hasRole("ADMIN")
+                                           .antMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")
                                            // Permit All - sign up
                                            .antMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
                                            // Authenticate - about me
                                            .antMatchers(HttpMethod.GET, "/api/v1/users/me/**").authenticated()
                                            // Admin only - get a user
-                                           .antMatchers(HttpMethod.GET,"/api/v1/users/**").hasRole("ADMIN")
+                                           .antMatchers(HttpMethod.GET, "/api/v1/users/**").hasRole("ADMIN")
 
                                            // ---------- WasteController ----------
                                            // Permit All - allow dustbins to post wastes and incorrect categorizations
@@ -82,12 +83,14 @@ public class SecurityConfig {
 
     @Bean
     UserDetailsService customUserDetailsService(UserRepository users) {
+
         return (username) -> users.findByUsername(username)
                                   .orElseThrow(() -> new UsernameNotFoundException("Username: " + username + " not found"));
     }
 
     @Bean
     AuthenticationManager customAuthenticationManager(UserDetailsService userDetailsService, PasswordEncoder encoder) {
+
         return authentication -> {
             String username = authentication.getPrincipal() + "";
             String password = authentication.getCredentials() + "";

@@ -11,6 +11,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Component
 public class WasteModelAssembler
         implements RepresentationModelAssembler<Waste, EntityModel<Waste>> {
+
     @Override
     public EntityModel<Waste> toModel(Waste waste) {
 

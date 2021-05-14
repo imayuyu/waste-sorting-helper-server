@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    // TODO: delayed updating
+
     ArrayList<User> findAllByOrderByCreditDesc();
 
     ArrayList<User> findAll();

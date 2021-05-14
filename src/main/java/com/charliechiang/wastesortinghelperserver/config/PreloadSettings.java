@@ -24,6 +24,7 @@ public class PreloadSettings {
     CommandLineRunner loadData(ServerSettingsRepository serverSettingsRepository,
                                UserRepository userRepository,
                                PasswordEncoder passwordEncoder) {
+
         int savedSettingsCount = 0;
 
         ArrayList<ServerSetting> defaultSettings = new ArrayList<>();

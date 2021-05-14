@@ -34,6 +34,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("/api/v1/wastes")
 public class WasteController {
+
     private final DustbinRepository dustbinRepository;
     private final UserRepository userRepository;
     private final WasteRepository wasteRepository;
@@ -47,6 +48,7 @@ public class WasteController {
                            WasteRepository wasteRepository,
                            WasteModelAssembler wasteModelAssembler,
                            UserController userController) {
+
         this.dustbinRepository = dustbinRepository;
         this.userRepository = userRepository;
         this.wasteRepository = wasteRepository;
@@ -118,6 +120,7 @@ public class WasteController {
     @PostMapping("/actions/report-incorrect-categorization")
     public ResponseEntity<?> reportIncorrectCategorization(@RequestParam(value = "dustbinId") Long dustbinId,
                                                            @RequestParam(value = "time") String submissionTime) {
+
         Dustbin referencedDustbin = dustbinRepository.findById(dustbinId)
                                                      .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
                                                                                                       + dustbinId
@@ -155,6 +158,7 @@ public class WasteController {
 
 
 class WasteForm {
+
     private WasteCategory category;
     private String time = "";
     private String username;
@@ -172,6 +176,7 @@ class WasteForm {
                      WasteCategory category,
                      String time,
                      Boolean isCorrectlyCategorized) {
+
         this.username = username;
         this.category = category;
         this.time = time;
@@ -186,6 +191,7 @@ class WasteForm {
                      WasteCategory category,
                      Boolean isCorrectlyCategorized
                     ) {
+
         this.username = username;
         this.category = category;
         this.weight = weight;

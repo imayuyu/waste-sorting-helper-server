@@ -18,10 +18,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -46,6 +44,7 @@ public class DustbinController {
                              UserRepository userRepository,
                              WasteModelAssembler wasteModelAssembler,
                              DustbinModelAssembler dustbinModelAssembler) {
+
         this.dustbinRepository = dustbinRepository;
         this.wasteRepository = wasteRepository;
         this.userRepository = userRepository;
@@ -89,29 +88,29 @@ public class DustbinController {
                              .body(entityModel);
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<?> updateDustbin(@PathVariable(value = "id") Long id,
-//                                           @RequestBody Dustbin newDustbin) {
-//
-//        Dustbin updatedDustbin =
-//                dustbinRepository.findById(id)
-//                                 .map(dustbin -> {
-//                                     dustbin.setName(newDustbin.getName());
-//                                     dustbin.setLongitude(newDustbin.getLongitude());
-//                                     dustbin.setLatitude(newDustbin.getLatitude());
-//                                     dustbin.setFull(newDustbin.getFull());
-//                                     return dustbinRepository.save(dustbin);
-//                                 })
-//                                 .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
-//                                                                                  + id
-//                                                                                  + " could not be found."));
-//
-//        EntityModel<Dustbin> entityModel = dustbinModelAssembler.toModel(updatedDustbin);
-//
-//        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
-//                                                 .toUri())
-//                             .body(entityModel);
-//    }
+    //    @PutMapping("/{id}")
+    //    public ResponseEntity<?> updateDustbin(@PathVariable(value = "id") Long id,
+    //                                           @RequestBody Dustbin newDustbin) {
+    //
+    //        Dustbin updatedDustbin =
+    //                dustbinRepository.findById(id)
+    //                                 .map(dustbin -> {
+    //                                     dustbin.setName(newDustbin.getName());
+    //                                     dustbin.setLongitude(newDustbin.getLongitude());
+    //                                     dustbin.setLatitude(newDustbin.getLatitude());
+    //                                     dustbin.setFull(newDustbin.getFull());
+    //                                     return dustbinRepository.save(dustbin);
+    //                                 })
+    //                                 .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
+    //                                                                                  + id
+    //                                                                                  + " could not be found."));
+    //
+    //        EntityModel<Dustbin> entityModel = dustbinModelAssembler.toModel(updatedDustbin);
+    //
+    //        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
+    //                                                 .toUri())
+    //                             .body(entityModel);
+    //    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteDustbin(@PathVariable Long id) {
@@ -139,8 +138,7 @@ public class DustbinController {
         EntityModel<Dustbin> entityModel =
                 dustbinModelAssembler.toModel(dustbinRepository.save(referencedDustbin));
 
-        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
-                                                 .toUri())
+        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                              .body(entityModel);
     }
 
@@ -156,34 +154,33 @@ public class DustbinController {
                                .map(wasteModelAssembler::toModel)
                                .collect(Collectors.toList());
 
-        return CollectionModel.of(wastes,
-                                  linkTo(methodOn(DustbinController.class).getWasteAllByDustbin(id))
-                                          .withSelfRel());
+        return CollectionModel.of(wastes, linkTo(methodOn(DustbinController.class).getWasteAllByDustbin(id))
+                .withSelfRel());
     }
 
-//    @PostMapping("/{id}/requests")
-//    public ResponseEntity<?> sendOpenLidRequest(@PathVariable Long id,
-//                                                @RequestBody LidOpenRequestForm lidOpenRequestForm) {
-//
-//        userRepository.findByUsername(lidOpenRequestForm.getUsername())
-//                      .orElseThrow(() -> new ResourceNotFoundException("User with username="
-//                                                                       + lidOpenRequestForm.getUsername()
-//                                                                       + " could not be found."));
-//
-//        ServerRequest generatedRequest = ServerRequest.generateNewRequest(lidOpenRequestForm.getUsername(),
-//                                                                          lidOpenRequestForm.getDustbinId());
-//        try {
-//            WebSocketController.sendRequest(generatedRequest);
-//        } catch (Exception ex) {
-//            throw new ResourceNotFoundException(ex.getMessage());
-//        }
-//
-//        EntityModel<ServerRequest> entityModel = EntityModel.of(generatedRequest,
-//                                                                linkTo(methodOn(DustbinController.class).getRequestSingle(generatedRequest.getDustbinId(),
-//                                                                                                                          generatedRequest.getRequestId())).withSelfRel());
-//
-//        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
-//    }
+    //    @PostMapping("/{id}/requests")
+    //    public ResponseEntity<?> sendOpenLidRequest(@PathVariable Long id,
+    //                                                @RequestBody LidOpenRequestForm lidOpenRequestForm) {
+    //
+    //        userRepository.findByUsername(lidOpenRequestForm.getUsername())
+    //                      .orElseThrow(() -> new ResourceNotFoundException("User with username="
+    //                                                                       + lidOpenRequestForm.getUsername()
+    //                                                                       + " could not be found."));
+    //
+    //        ServerRequest generatedRequest = ServerRequest.generateNewRequest(lidOpenRequestForm.getUsername(),
+    //                                                                          lidOpenRequestForm.getDustbinId());
+    //        try {
+    //            WebSocketController.sendRequest(generatedRequest);
+    //        } catch (Exception ex) {
+    //            throw new ResourceNotFoundException(ex.getMessage());
+    //        }
+    //
+    //        EntityModel<ServerRequest> entityModel = EntityModel.of(generatedRequest,
+    //                                                                linkTo(methodOn(DustbinController.class).getRequestSingle(generatedRequest.getDustbinId(),
+    //                                                                                                                          generatedRequest.getRequestId())).withSelfRel());
+    //
+    //        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
+    //    }
 
     @PostMapping("/{id}/requests")
     public ResponseEntity<?> sendOpenLidRequestByToken(@PathVariable Long id,
@@ -194,17 +191,18 @@ public class DustbinController {
                                                                        + userDetails.getUsername()
                                                                        + " could not be found."));
 
-        ServerRequest generatedRequest = ServerRequest.generateNewRequest(userDetails.getUsername(),
-                                                                          id);
+        ServerRequest generatedRequest = ServerRequest.generateNewRequest(userDetails.getUsername(), id);
+
         try {
             WebSocketController.sendRequest(generatedRequest);
         } catch (Exception ex) {
             throw new ResourceNotFoundException(ex.getMessage());
         }
 
-        EntityModel<ServerRequest> entityModel = EntityModel.of(generatedRequest,
-                                                                linkTo(methodOn(DustbinController.class).getRequestSingle(generatedRequest.getDustbinId(),
-                                                                                                                          generatedRequest.getRequestId())).withSelfRel());
+        EntityModel<ServerRequest> entityModel =
+                EntityModel.of(generatedRequest,
+                               linkTo(methodOn(DustbinController.class).getRequestSingle(generatedRequest.getDustbinId(),
+                                                                                         generatedRequest.getRequestId())).withSelfRel());
 
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
@@ -220,6 +218,7 @@ public class DustbinController {
 }
 
 class LidOpenRequestForm {
+
     private Long dustbinId;
     private String username;
 
@@ -246,6 +245,7 @@ class LidOpenRequestForm {
 }
 
 class DustbinFullForm {
+
     private Boolean isHazardousWasteFull;
     private Boolean isRecyclableWasteFull;
     private Boolean isFoodWasteFull;

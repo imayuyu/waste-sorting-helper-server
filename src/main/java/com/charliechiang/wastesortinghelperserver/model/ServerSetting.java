@@ -7,6 +7,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "server_settings")
 public class ServerSetting {
+
     @Id
     private String id;
     private String value;
@@ -19,6 +20,7 @@ public class ServerSetting {
     public ServerSetting(String id,
                          String value,
                          String type) {
+
         this.id = id;
         this.value = value;
         this.type = type;

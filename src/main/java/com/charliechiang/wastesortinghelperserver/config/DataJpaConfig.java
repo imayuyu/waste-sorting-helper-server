@@ -18,6 +18,7 @@ public class DataJpaConfig {
 
     @Bean
     public AuditorAware<Username> auditor() {
+
         return () -> Optional.ofNullable(SecurityContextHolder.getContext())
                              .map(SecurityContext::getAuthentication)
                              .filter(Authentication::isAuthenticated)

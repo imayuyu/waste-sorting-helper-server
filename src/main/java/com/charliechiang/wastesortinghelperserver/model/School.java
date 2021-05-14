@@ -7,6 +7,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "school")
 public class School {
+
     @Id
     private Long id;
     private String name;
@@ -21,6 +22,7 @@ public class School {
                   String name,
                   String ename,
                   Integer studentCount) {
+
         this.id = id;
         this.name = name;
         this.ename = ename;

@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "waste")
 public class Waste {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -43,6 +44,7 @@ public class Waste {
     }
 
     public Waste(User user, WasteCategory category, Double weight, Dustbin dustbin, LocalDateTime time) {
+
         this.user = user;
         this.category = category;
         this.time = time;

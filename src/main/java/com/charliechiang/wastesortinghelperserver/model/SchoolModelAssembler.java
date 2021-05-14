@@ -11,8 +11,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Component
 public class SchoolModelAssembler
         implements RepresentationModelAssembler<School, EntityModel<School>> {
+
     @Override
     public EntityModel<School> toModel(School school) {
+
         return EntityModel.of(school,
                               linkTo(methodOn(SchoolController.class).getSchoolSingle(school.getId())).withSelfRel());
     }

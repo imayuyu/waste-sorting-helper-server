@@ -25,30 +25,32 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("/api/v1/schools")
 public class SchoolController {
+
     private final SchoolRepository schoolRepository;
     private final SchoolModelAssembler schoolModelAssembler;
 
     public SchoolController(SchoolRepository schoolRepository,
                             SchoolModelAssembler schoolModelAssembler) {
+
         this.schoolRepository = schoolRepository;
         this.schoolModelAssembler = schoolModelAssembler;
     }
 
     @GetMapping("")
     public CollectionModel<EntityModel<School>> getSchoolAll() {
+
         List<EntityModel<School>> schools =
                 schoolRepository.findAll()
                                 .stream()
                                 .map(schoolModelAssembler::toModel)
                                 .collect(Collectors.toList());
 
-        return CollectionModel.of(schools,
-                                  linkTo(methodOn(SchoolController.class).getSchoolAll())
-                                          .withSelfRel());
+        return CollectionModel.of(schools, linkTo(methodOn(SchoolController.class).getSchoolAll()).withSelfRel());
     }
 
     @GetMapping("/{id}")
     public EntityModel<School> getSchoolSingle(@PathVariable Long id) {
+
         School referencedSchool =
                 schoolRepository.findById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("School with ID=" + id + " could not be found."));
@@ -58,16 +60,17 @@ public class SchoolController {
 
     @PostMapping("")
     public ResponseEntity<?> addSchool(@RequestBody(required = false) School newSchool) {
+
         EntityModel<School> entityModel =
                 schoolModelAssembler.toModel(schoolRepository.save(newSchool));
 
-        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
-                                                 .toUri())
+        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                              .body(entityModel);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteDustbin(@PathVariable Long id) {
+
         schoolRepository.deleteById(id);
 
         return ResponseEntity.noContent().build();

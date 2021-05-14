@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,6 +44,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
+
     private final UserRepository userRepository;
     private final WasteRepository wasteRepository;
     private final SchoolRepository schoolRepository;
@@ -78,6 +78,7 @@ public class UserController {
 
     @GetMapping("/me")
     public EntityModel<User> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+
         User currentUser =
                 userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new ResourceNotFoundException(
                         "User with username="
@@ -90,6 +91,7 @@ public class UserController {
     @GetMapping("/me/wastes")
     public CollectionModel<EntityModel<Waste>> getCurrentUserWasteList(@AuthenticationPrincipal UserDetails userDetails,
                                                                        @RequestParam(value = "n", defaultValue = "0") Long n) {
+
         User currentUser =
                 userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new ResourceNotFoundException(
                         "User with username="
@@ -121,6 +123,7 @@ public class UserController {
 
     @GetMapping("")
     public CollectionModel<EntityModel<User>> getUserAll() {
+
         List<EntityModel<User>> users =
                 userRepository.findAll()
                               .stream()
@@ -141,7 +144,7 @@ public class UserController {
         }
 
         User newUser = new User();
-        // TODO: set password
+
         newUser.setUsername(userCreationForm.getUsername());
         newUser.setPassword(this.passwordEncoder.encode(userCreationForm.getPassword()));
         newUser.setRealName(userCreationForm.getRealName());
@@ -163,35 +166,34 @@ public class UserController {
     public EntityModel<User> getUserSingle(@PathVariable(value = "username") String username) {
 
         User referencedUser =
-                userRepository.findByUsername(username)
-                              .orElseThrow(() -> new ResourceNotFoundException("User with username="
+                userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User with username="
                                                                                + username
                                                                                + " could not be found."));
 
         return userModelAssembler.toModel(referencedUser);
     }
 
-//    // TODO: enable updating on all fields in User
-//    @PutMapping("/{username}")
-//    public ResponseEntity<?> updateUser(@PathVariable String username,
-//                                        @RequestParam(value = "name") String name) {
-//
-//        User updatedUser =
-//                userRepository.findByUsername()
-//                              .map(user -> {
-//                                  user.setUsername(name);
-//                                  return userRepository.save(user);
-//                              })
-//                              .orElseThrow(() -> new ResourceNotFoundException("User with ID="
-//                                                                               + id
-//                                                                               + " could not be found."));
-//
-//        EntityModel<User> entityModel = userModelAssembler.toModel(updatedUser);
-//
-//        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
-//                                                 .toUri())
-//                             .body(entityModel);
-//    }
+    //
+    //    @PutMapping("/{username}")
+    //    public ResponseEntity<?> updateUser(@PathVariable String username,
+    //                                        @RequestParam(value = "name") String name) {
+    //
+    //        User updatedUser =
+    //                userRepository.findByUsername()
+    //                              .map(user -> {
+    //                                  user.setUsername(name);
+    //                                  return userRepository.save(user);
+    //                              })
+    //                              .orElseThrow(() -> new ResourceNotFoundException("User with ID="
+    //                                                                               + id
+    //                                                                               + " could not be found."));
+    //
+    //        EntityModel<User> entityModel = userModelAssembler.toModel(updatedUser);
+    //
+    //        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
+    //                                                 .toUri())
+    //                             .body(entityModel);
+    //    }
 
     @DeleteMapping("/{username}")
     public ResponseEntity<?> deleteUser(@PathVariable String username) {
@@ -205,6 +207,7 @@ public class UserController {
     @GetMapping("/{username}/wastes")
     public CollectionModel<EntityModel<Waste>> getWasteAllByUser(@PathVariable(value = "username") String username,
                                                                  @RequestParam(value = "n", defaultValue = "0") Long n) {
+
 
         User referencedUser = userRepository.findByUsername(username)
                                             .orElseThrow(() -> new ResourceNotFoundException("User with username="
@@ -357,6 +360,7 @@ public class UserController {
     }
 
     public void updateRanking() throws Exception {
+
         // Do not do full update everytime
         if (lastUpdatedRankingTime.plusSeconds(ServerSettingsController.getServerSetting("rankingUpdateDelay", serverSettingsRepository))
                                   .isAfter(LocalDateTime.now())) {
@@ -394,6 +398,7 @@ public class UserController {
 }
 
 class UserCreationForm {
+
     @NotNull
     private String username;
     @NotNull
@@ -458,6 +463,7 @@ class UserCreationForm {
 }
 
 class PersonalRankingData {
+
     private Integer schoolRanking;
     private Integer collegeRanking;
     private Integer schoolStudentCount;

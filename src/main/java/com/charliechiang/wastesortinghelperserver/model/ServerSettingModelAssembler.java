@@ -11,8 +11,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Component
 public class ServerSettingModelAssembler
         implements RepresentationModelAssembler<ServerSetting, EntityModel<ServerSetting>> {
+
     @Override
     public EntityModel<ServerSetting> toModel(ServerSetting serverSetting) {
+
         return EntityModel.of(serverSetting,
                               linkTo(methodOn(ServerSettingsController.class).getServerSettingSingle(serverSetting.getId())).withSelfRel());
     }

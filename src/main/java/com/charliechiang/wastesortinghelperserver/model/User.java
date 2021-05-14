@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "user")
 public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -103,6 +104,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+
         return this.roles
                 .stream()
                 .map(SimpleGrantedAuthority::new)

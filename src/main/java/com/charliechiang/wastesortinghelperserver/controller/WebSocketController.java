@@ -23,11 +23,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 @ServerEndpoint("/api/v1/ws/dustbins/{dustbinId}")
 @Component
 public class WebSocketController {
+
     private static final Log logger = LogFactory.getLog(WebSocketController.class);
     private static final AtomicInteger onlineDustbinCount = new AtomicInteger(0);
     private static final ConcurrentHashMap<Long, WebSocketController> connectionMap = new ConcurrentHashMap<>();
+
     private Session session;
     private Long dustbinId;
+
     private final LinkedHashMap<Long, ServerRequest> messageHistory = new LinkedHashMap<>() {
         @Override
         protected boolean removeEldestEntry(Map.Entry<Long, ServerRequest> eldest) {
@@ -88,7 +91,11 @@ public class WebSocketController {
         }
 
 
-        if (type == null || requestId == null || username == null || dustbinId == null || description == null) {
+        if (type == null
+            || requestId == null
+            || username == null
+            || dustbinId == null
+            || description == null) {
             return;
         }
 

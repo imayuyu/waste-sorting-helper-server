@@ -1,6 +1,5 @@
 package com.charliechiang.wastesortinghelperserver.controller;
 
-
 import com.charliechiang.wastesortinghelperserver.repository.UserRepository;
 import com.charliechiang.wastesortinghelperserver.security.JwtTokenProvider;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +30,7 @@ public class AuthenticationController {
     public AuthenticationController(AuthenticationManager authenticationManager,
                                     JwtTokenProvider jwtTokenProvider,
                                     UserRepository userRepository) {
+
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
         this.userRepository = userRepository;
@@ -56,6 +56,7 @@ public class AuthenticationController {
 }
 
 class AuthenticationRequest implements Serializable {
+
     private static final long serialVersionUID = 3297480562389756L;
     private String username;
     private String password;

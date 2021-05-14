@@ -40,12 +40,14 @@ public class JwtTokenProvider {
 
     public JwtTokenProvider(JwtProperties jwtProperties,
                             ServerSettingsRepository serverSettingsRepository) {
+
         this.jwtProperties = jwtProperties;
         this.serverSettingsRepository = serverSettingsRepository;
     }
 
     @PostConstruct
     public void init() {
+
         var secret = Base64.getEncoder().encodeToString(this.jwtProperties.getSecretKey().getBytes());
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
@@ -55,11 +57,13 @@ public class JwtTokenProvider {
         String username = authentication.getName();
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Claims claims = Jwts.claims().setSubject(username);
+
         if (!authorities.isEmpty()) {
             claims.put(AUTHORITIES_KEY, authorities.stream().map(GrantedAuthority::getAuthority).collect(joining(",")));
         }
+
         Long validityDelay = ServerSettingsController.getServerSetting("tokenExpirationDelay", serverSettingsRepository);
-//        log.info(validityDelay);
+
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityDelay.longValue() * 1000);
 
@@ -73,6 +77,7 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
+
         Claims claims = Jwts.parserBuilder().setSigningKey(this.secretKey).build().parseClaimsJws(token).getBody();
 
         Object authoritiesClaim = claims.get(AUTHORITIES_KEY);
@@ -86,16 +91,18 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token) {
+
         try {
             Jws<Claims> claims = Jwts
                     .parserBuilder().setSigningKey(this.secretKey).build()
                     .parseClaimsJws(token);
             //  parseClaimsJws will check expiration date. No need do here.
-//            log.info("expiration date: " + claims.getBody().getExpiration());
             return true;
+
         } catch (JwtException | IllegalArgumentException e) {
             log.info("Invalid JWT token: " + e.getMessage());
         }
+
         return false;
     }
 }

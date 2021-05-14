@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
 public class ResourceConflictAdvice {
+
     @ResponseBody
     @ExceptionHandler(ResourceConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)

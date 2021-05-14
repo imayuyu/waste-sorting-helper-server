@@ -26,17 +26,20 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("/api/v1/settings")
 public class ServerSettingsController {
+
     private final ServerSettingsRepository serverSettingsRepository;
     private final ServerSettingModelAssembler serverSettingModelAssembler;
 
     public ServerSettingsController(ServerSettingsRepository serverSettingsRepository,
                                     ServerSettingModelAssembler serverSettingModelAssembler) {
+
         this.serverSettingsRepository = serverSettingsRepository;
         this.serverSettingModelAssembler = serverSettingModelAssembler;
     }
 
     public static <Any> Any getServerSetting(String settingId,
                                              ServerSettingsRepository serverSettingsRepository) throws Exception {
+
         Optional<ServerSetting> referencedServerSetting = serverSettingsRepository.findById(settingId);
 
         if (referencedServerSetting.isEmpty()) {
@@ -55,6 +58,7 @@ public class ServerSettingsController {
 
     @GetMapping("")
     public CollectionModel<EntityModel<ServerSetting>> getServerSettingAll() {
+
         List<EntityModel<ServerSetting>> serverSettings =
                 serverSettingsRepository.findAll()
                                         .stream()
@@ -87,6 +91,7 @@ public class ServerSettingsController {
 
     @DeleteMapping("/{settingId}")
     public ResponseEntity<?> deleteServerSetting(@PathVariable String settingId) {
+
         serverSettingsRepository.deleteById(settingId);
 
         return ResponseEntity.noContent().build();

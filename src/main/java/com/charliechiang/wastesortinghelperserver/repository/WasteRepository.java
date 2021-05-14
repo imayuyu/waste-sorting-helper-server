@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 @Repository
 public interface WasteRepository extends JpaRepository<Waste, Long> {
+
     ArrayList<Waste> findTop5ByDustbinOrderByIdDesc(Dustbin dustbin);
 
     ArrayList<Waste> findByDustbinOrderByIdDesc(Dustbin dustbin);

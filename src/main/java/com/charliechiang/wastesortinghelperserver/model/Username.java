@@ -4,6 +4,7 @@ import javax.persistence.Embeddable;
 
 @Embeddable
 public class Username {
+
     private String username;
 
     public Username() {

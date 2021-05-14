@@ -25,6 +25,7 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
     private final JwtTokenProvider jwtTokenProvider;
 
     public JwtTokenAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
+
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
@@ -47,10 +48,12 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
     }
 
     private String resolveToken(HttpServletRequest request) {
+
         String bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(HEADER_PREFIX)) {
             return bearerToken.substring(7);
         }
+
         return null;
     }
 }
