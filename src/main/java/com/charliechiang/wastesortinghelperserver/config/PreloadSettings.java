@@ -30,7 +30,7 @@ public class PreloadSettings {
         defaultSettings.add(new ServerSetting("creditUpdateDelay","120","integer")); //second
         defaultSettings.add(new ServerSetting("rankingUpdateDelay","3600","integer")); //second
         defaultSettings.add(new ServerSetting("wasteWeightThreshold","10","decimal"));// kg
-        defaultSettings.add(new ServerSetting("tokenExpirationDelay","60","decimal"));// second
+        defaultSettings.add(new ServerSetting("tokenExpirationDelay","604800","integer"));// second
 
 
         for(ServerSetting i:defaultSettings){
@@ -49,7 +49,7 @@ public class PreloadSettings {
         if(admin.isEmpty()){
             User newAdmin = new User();
             newAdmin.setUsername("admin");
-            newAdmin.setPassword(passwordEncoder.encode("password"));
+            newAdmin.setPassword(passwordEncoder.encode("78QjIthLby1K"));
             newAdmin.setRoles(Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
             userRepository.save(newAdmin);
         }

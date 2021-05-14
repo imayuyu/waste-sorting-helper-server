@@ -1,6 +1,7 @@
 package com.charliechiang.wastesortinghelperserver.model;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 
 @Entity
 public class Dustbin {

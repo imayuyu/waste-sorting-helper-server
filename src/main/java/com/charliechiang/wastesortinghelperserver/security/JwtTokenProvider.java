@@ -1,6 +1,8 @@
 package com.charliechiang.wastesortinghelperserver.security;
 
+import com.charliechiang.wastesortinghelperserver.controller.ServerSettingsController;
 import com.charliechiang.wastesortinghelperserver.controller.WebSocketController;
+import com.charliechiang.wastesortinghelperserver.repository.ServerSettingsRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
@@ -16,12 +18,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
+
 import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
+
 import static java.util.stream.Collectors.joining;
 
 @Component
@@ -31,12 +35,15 @@ public class JwtTokenProvider {
 
     private final JwtProperties jwtProperties;
 
+    private final ServerSettingsRepository serverSettingsRepository;
 
     private SecretKey secretKey;
     private static final Log log = LogFactory.getLog(JwtTokenProvider.class);
 
-    public JwtTokenProvider(JwtProperties jwtProperties) {
-        this.jwtProperties=jwtProperties;
+    public JwtTokenProvider(JwtProperties jwtProperties,
+                            ServerSettingsRepository serverSettingsRepository) {
+        this.jwtProperties = jwtProperties;
+        this.serverSettingsRepository = serverSettingsRepository;
     }
 
     @PostConstruct
@@ -45,7 +52,7 @@ public class JwtTokenProvider {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String createToken(Authentication authentication) {
+    public String createToken(Authentication authentication) throws Exception {
 
         String username = authentication.getName();
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -53,9 +60,10 @@ public class JwtTokenProvider {
         if (!authorities.isEmpty()) {
             claims.put(AUTHORITIES_KEY, authorities.stream().map(GrantedAuthority::getAuthority).collect(joining(",")));
         }
-
+        Long validityDelay = ServerSettingsController.getServerSetting("tokenExpirationDelay", serverSettingsRepository);
+        log.info(validityDelay);
         Date now = new Date();
-        Date validity = new Date(now.getTime() + this.jwtProperties.getValidityInMs());
+        Date validity = new Date(now.getTime() + validityDelay.longValue() * 1000);
 
         return Jwts.builder()
                    .setClaims(claims)
