@@ -64,8 +64,12 @@ public class SecurityConfig {
                                            .antMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
                                            // Authenticate - about me
                                            .antMatchers(HttpMethod.GET, "/api/v1/users/me/**").authenticated()
+                                           // Authenticate - update me
+                                           .antMatchers(HttpMethod.PUT, "/api/v1/users/me/**").authenticated()
                                            // Admin only - get a user
                                            .antMatchers(HttpMethod.GET, "/api/v1/users/**").hasRole("ADMIN")
+                                           // Admin only - update a user
+                                           .antMatchers(HttpMethod.PUT, "/api/v1/users/**").hasRole("ADMIN")
 
                                            // ---------- WasteController ----------
                                            // Permit All - allow dustbins to post wastes and incorrect categorizations
