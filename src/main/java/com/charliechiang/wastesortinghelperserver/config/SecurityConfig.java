@@ -48,6 +48,8 @@ public class SecurityConfig {
                                            .antMatchers(HttpMethod.POST, "/api/v1/dustbins/*/full").permitAll()
 
                                            // ---------- SchoolController ----------
+                                           // Permit All - get school list
+                                           .antMatchers(HttpMethod.GET, "/api/v1/schools").permitAll()
                                            // Admin only - add schools
                                            .antMatchers(HttpMethod.POST, "/api/v1/schools/**").hasRole("ADMIN")
                                            // Admin only - delete schools
