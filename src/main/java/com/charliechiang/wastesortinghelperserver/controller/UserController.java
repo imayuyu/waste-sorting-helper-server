@@ -149,6 +149,9 @@ public class UserController {
         newUser.setOpenId(userCreationForm.getOpenId());
         newUser.setRoles(roles);
 
+        Optional<User> referencedUser = userRepository.findByUsername(userCreationForm.getUsername());
+        referencedUser.ifPresent(user -> newUser.setId(user.getId()));
+
         EntityModel<User> entityModel = userModelAssembler.toModel(userRepository.save(newUser));
 
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
