@@ -16,6 +16,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -134,15 +136,7 @@ public class UserController {
                                   linkTo(methodOn(UserController.class).getUserAll()).withSelfRel());
     }
 
-    @PostMapping("")
-    public ResponseEntity<?> addUser(@RequestBody UserCreationForm userCreationForm) {
-
-        Optional<User> referencedUser = userRepository.findByUsername(userCreationForm.getUsername());
-        if (referencedUser.isPresent() || userCreationForm.getUsername().equals("me")) {
-            throw new ResourceConflictException("User with username=" + userCreationForm.getUsername() + " already exists" +
-                                                ".");
-        }
-
+    private ResponseEntity<?> saveUser(UserCreationForm userCreationForm) {
         User newUser = new User();
 
         newUser.setUsername(userCreationForm.getUsername());
@@ -153,12 +147,40 @@ public class UserController {
         newUser.setOpenId(userCreationForm.getOpenId());
         newUser.setRoles(Collections.singletonList("ROLE_USER"));
 
-        EntityModel<User> entityModel =
-                userModelAssembler.toModel(userRepository.save(newUser));
+        EntityModel<User> entityModel = userModelAssembler.toModel(userRepository.save(newUser));
 
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
                                                  .toUri())
                              .body(entityModel);
+    }
+
+    @PostMapping("")
+    public ResponseEntity<?> addUser(@RequestBody UserCreationForm userCreationForm) {
+
+        Optional<User> referencedUser = userRepository.findByUsername(userCreationForm.getUsername());
+        if (referencedUser.isPresent() || userCreationForm.getUsername().equals("me")) {
+            throw new ResourceConflictException("User with username=" + userCreationForm.getUsername() + " already exists" +
+                                                ".");
+        }
+
+        return saveUser(userCreationForm);
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<?> updateCurrentUser(@AuthenticationPrincipal UserDetails userDetails,
+                                               @RequestBody UserCreationForm userCreationForm) {
+
+        if (!userCreationForm.getUsername().equals(userDetails.getUsername())) {
+            throw new BadCredentialsException("You can only update your own account.");
+        }
+
+        return saveUser(userCreationForm);
+    }
+
+    @PutMapping("/{username}")
+    public ResponseEntity<?> updateUser(@RequestBody UserCreationForm userCreationForm) {
+
+        return saveUser(userCreationForm);
     }
 
 
@@ -167,8 +189,8 @@ public class UserController {
 
         User referencedUser =
                 userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User with username="
-                                                                               + username
-                                                                               + " could not be found."));
+                                                                                                        + username
+                                                                                                        + " could not be found."));
 
         return userModelAssembler.toModel(referencedUser);
     }
