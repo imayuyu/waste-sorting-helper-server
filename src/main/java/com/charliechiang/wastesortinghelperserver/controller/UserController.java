@@ -136,16 +136,18 @@ public class UserController {
                                   linkTo(methodOn(UserController.class).getUserAll()).withSelfRel());
     }
 
-    private ResponseEntity<?> saveUser(UserCreationForm userCreationForm) {
+    private ResponseEntity<?> saveUser(UserCreationForm userCreationForm, List<String> roles) {
         User newUser = new User();
 
         newUser.setUsername(userCreationForm.getUsername());
         newUser.setPassword(this.passwordEncoder.encode(userCreationForm.getPassword()));
         newUser.setRealName(userCreationForm.getRealName());
-        newUser.setSchool(schoolRepository.findById(userCreationForm.getSchoolId()).orElseThrow(() -> new ResourceNotFoundException("School with ID=" + userCreationForm.getSchoolId() + " could not be found.")));
+        if (userCreationForm.getSchoolId() != -1) {
+            newUser.setSchool(schoolRepository.findById(userCreationForm.getSchoolId()).orElseThrow(() -> new ResourceNotFoundException("School with ID=" + userCreationForm.getSchoolId() + " could not be found.")));
+        }
         newUser.setTimeOfEnrollment(userCreationForm.getTimeOfEnrollment());
         newUser.setOpenId(userCreationForm.getOpenId());
-        newUser.setRoles(Collections.singletonList("ROLE_USER"));
+        newUser.setRoles(roles);
 
         EntityModel<User> entityModel = userModelAssembler.toModel(userRepository.save(newUser));
 
@@ -163,7 +165,7 @@ public class UserController {
                                                 ".");
         }
 
-        return saveUser(userCreationForm);
+        return saveUser(userCreationForm, Collections.singletonList("ROLE_USER"));
     }
 
     @PutMapping("/me")
@@ -174,13 +176,13 @@ public class UserController {
             throw new BadCredentialsException("You can only update your own account.");
         }
 
-        return saveUser(userCreationForm);
+        return saveUser(userCreationForm, Collections.singletonList("ROLE_USER"));
     }
 
     @PutMapping("/{username}")
     public ResponseEntity<?> updateUser(@RequestBody UserCreationForm userCreationForm) {
 
-        return saveUser(userCreationForm);
+        return saveUser(userCreationForm, Collections.singletonList("ROLE_USER"));
     }
 
 
@@ -417,6 +419,30 @@ public class UserController {
 
         lastUpdatedRankingTime = LocalDateTime.now();
     }
+
+    @PostMapping("/admins")
+    public ResponseEntity<?> addAdmin(@RequestBody UserCreationForm userCreationForm) {
+
+        Optional<User> referencedUser = userRepository.findByUsername(userCreationForm.getUsername());
+        if (referencedUser.isPresent() || userCreationForm.getUsername().equals("me")) {
+            throw new ResourceConflictException("User with username=" + userCreationForm.getUsername() + " already exists" + ".");
+        }
+
+        return saveUser(userCreationForm, Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
+    }
+
+    @GetMapping("/admins")
+    public CollectionModel<EntityModel<User>> getAdminAll() {
+
+        List<EntityModel<User>> admins =
+                userRepository.findAllByRolesIsContaining("ROLE_ADMIN")
+                              .stream()
+                              .map(userModelAssembler::toModel)
+                              .collect(Collectors.toList());
+
+        return CollectionModel.of(admins,
+                                  linkTo(methodOn(UserController.class).getUserAll()).withSelfRel());
+    }
 }
 
 class UserCreationForm {
@@ -427,9 +453,9 @@ class UserCreationForm {
     private String password;
     @NotNull
     private String realName;
-    private String openId;
-    private Long schoolId;
-    private Short timeOfEnrollment;
+    private String openId = "";
+    private Long schoolId = -1L;
+    private Short timeOfEnrollment = -1;
 
     public UserCreationForm() {
 
