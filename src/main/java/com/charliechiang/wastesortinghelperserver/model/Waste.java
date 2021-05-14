@@ -1,8 +1,14 @@
-package com.charliechiang.wastesortinghelperserver;
+package com.charliechiang.wastesortinghelperserver.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
@@ -36,13 +42,13 @@ public class Waste {
 
     }
 
-    public Waste(User user, WasteCategory category, Double weight, Dustbin dustbin ,LocalDateTime time) {
+    public Waste(User user, WasteCategory category, Double weight, Dustbin dustbin, LocalDateTime time) {
         this.user = user;
         this.category = category;
         this.time = time;
-        this.weight=weight;
-        this.dustbin=dustbin;
-        this.isCorrectlyCategorized=true;
+        this.weight = weight;
+        this.dustbin = dustbin;
+        this.isCorrectlyCategorized = true;
     }
 
     public Dustbin getDustbin() {

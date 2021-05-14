@@ -1,5 +1,14 @@
-package com.charliechiang.wastesortinghelperserver;
+package com.charliechiang.wastesortinghelperserver.controller;
 
+import com.charliechiang.wastesortinghelperserver.exception.ResourceNotFoundException;
+import com.charliechiang.wastesortinghelperserver.model.Dustbin;
+import com.charliechiang.wastesortinghelperserver.model.User;
+import com.charliechiang.wastesortinghelperserver.model.Waste;
+import com.charliechiang.wastesortinghelperserver.model.WasteCategory;
+import com.charliechiang.wastesortinghelperserver.model.WasteModelAssembler;
+import com.charliechiang.wastesortinghelperserver.repository.DustbinRepository;
+import com.charliechiang.wastesortinghelperserver.repository.UserRepository;
+import com.charliechiang.wastesortinghelperserver.repository.WasteRepository;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -9,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,6 +32,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
+@RequestMapping("/api/v1/wastes")
 public class WasteController {
     private final DustbinRepository dustbinRepository;
     private final UserRepository userRepository;
@@ -29,22 +40,26 @@ public class WasteController {
 
     private final WasteModelAssembler wasteModelAssembler;
 
+    private final UserController userController;
+
     public WasteController(DustbinRepository dustbinRepository,
                            UserRepository userRepository,
                            WasteRepository wasteRepository,
-                           WasteModelAssembler wasteModelAssembler) {
+                           WasteModelAssembler wasteModelAssembler,
+                           UserController userController) {
         this.dustbinRepository = dustbinRepository;
         this.userRepository = userRepository;
         this.wasteRepository = wasteRepository;
         this.wasteModelAssembler = wasteModelAssembler;
+        this.userController = userController;
     }
 
-    @PostMapping("/api/wastes")
-    public ResponseEntity<?> addWaste(@RequestBody WasteForm wasteForm) {
+    @PostMapping("")
+    public ResponseEntity<?> addWaste(@RequestBody WasteForm wasteForm) throws Exception {
 
-        User referencedUser = userRepository.findById(wasteForm.getUserId())
-                                            .orElseThrow(() -> new ResourceNotFoundException("User with ID="
-                                                                                             + wasteForm.getUserId()
+        User referencedUser = userRepository.findByUsername(wasteForm.getUsername())
+                                            .orElseThrow(() -> new ResourceNotFoundException("User with username="
+                                                                                             + wasteForm.getUsername()
                                                                                              + " could not be found."));
         Dustbin referencedDustbin = dustbinRepository.findById(wasteForm.getDustbinId())
                                                      .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
@@ -67,12 +82,15 @@ public class WasteController {
                                                                            referencedDustbin,
                                                                            submissionLocalDateTime)));
 
+        // TODO: make async
+        userController.updateCredit(referencedUser, false);
+
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
                                                  .toUri())
                              .body(entityModel);
     }
 
-    @GetMapping("/api/wastes/{id}")
+    @GetMapping("/{id}")
     public EntityModel<Waste> getWasteSingle(@PathVariable Long id) {
 
         return wasteModelAssembler.toModel(wasteRepository.findById(id)
@@ -82,7 +100,7 @@ public class WasteController {
                                                                                                            + " could not be found.")));
     }
 
-    @GetMapping("/api/wastes")
+    @GetMapping("")
     public CollectionModel<EntityModel<Waste>> getWasteAll() {
 
         List<EntityModel<Waste>> wastes =
@@ -97,8 +115,8 @@ public class WasteController {
     }
 
 
-    @PostMapping("/api/wastes/actions/report-incorrect-categorization")
-    public ResponseEntity<?> reportIncorrectCategorization(@RequestParam(value = "dustbinid") Long dustbinId,
+    @PostMapping("/actions/report-incorrect-categorization")
+    public ResponseEntity<?> reportIncorrectCategorization(@RequestParam(value = "dustbinId") Long dustbinId,
                                                            @RequestParam(value = "time") String submissionTime) {
         Dustbin referencedDustbin = dustbinRepository.findById(dustbinId)
                                                      .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
@@ -120,6 +138,9 @@ public class WasteController {
                 suggestedWaste = i;
                 suggestedWaste.setCorrectlyCategorized(false);
 
+                suggestedWaste.getUser().setNeedFullCreditUpdate(true);
+                userRepository.save(suggestedWaste.getUser());
+
                 EntityModel<Waste> entityModel = wasteModelAssembler.toModel(wasteRepository.save(suggestedWaste));
 
                 return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
@@ -136,7 +157,7 @@ public class WasteController {
 class WasteForm {
     private WasteCategory category;
     private String time = "";
-    private Long userId;
+    private String username;
     private Double weight;
     private Long dustbinId;
     private Boolean isCorrectlyCategorized;
@@ -145,13 +166,13 @@ class WasteForm {
 
     }
 
-    public WasteForm(Long userId,
+    public WasteForm(String username,
                      Long dustbinId,
                      Double weight,
                      WasteCategory category,
                      String time,
                      Boolean isCorrectlyCategorized) {
-        this.userId = userId;
+        this.username = username;
         this.category = category;
         this.time = time;
         this.weight = weight;
@@ -159,13 +180,13 @@ class WasteForm {
         this.isCorrectlyCategorized = isCorrectlyCategorized;
     }
 
-    public WasteForm(Long userId,
+    public WasteForm(String username,
                      Long dustbinId,
                      Double weight,
                      WasteCategory category,
                      Boolean isCorrectlyCategorized
                     ) {
-        this.userId = userId;
+        this.username = username;
         this.category = category;
         this.weight = weight;
         this.dustbinId = dustbinId;
@@ -188,12 +209,12 @@ class WasteForm {
         this.time = time;
     }
 
-    public Long getUserId() {
-        return userId;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public Double getWeight() {

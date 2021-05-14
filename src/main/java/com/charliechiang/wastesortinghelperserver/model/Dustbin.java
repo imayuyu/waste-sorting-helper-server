@@ -1,6 +1,9 @@
-package com.charliechiang.wastesortinghelperserver;
+package com.charliechiang.wastesortinghelperserver.model;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 @Entity
 public class Dustbin {
@@ -13,13 +16,14 @@ public class Dustbin {
     private Boolean isFull;
 
 
-    public Dustbin() {}
+    public Dustbin() {
+    }
 
     public Dustbin(String name, Double latitude, Double longitude) {
-        this.name=name;
-        this.latitude=latitude;
-        this.longitude=longitude;
-        this.isFull=false;
+        this.name = name;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.isFull = false;
     }
 
     public Long getId() {
