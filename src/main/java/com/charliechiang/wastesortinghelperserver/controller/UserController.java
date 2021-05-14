@@ -87,6 +87,38 @@ public class UserController {
         return userModelAssembler.toModel(currentUser);
     }
 
+    @GetMapping("me/wastes")
+    public CollectionModel<EntityModel<Waste>> getCurrentUserWasteList(@AuthenticationPrincipal UserDetails userDetails,
+                                                                       @RequestParam(value = "n", defaultValue = "0") Long n) {
+        User currentUser =
+                userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new ResourceNotFoundException(
+                        "User with username="
+                        + userDetails.getUsername()
+                        + " could not be found."));
+
+        List<EntityModel<Waste>> wastes;
+
+        if (20 == n) {
+            wastes = wasteRepository.findTop20ByUserOrderByIdDesc(currentUser)
+                                    .stream()
+                                    .map(wasteModelAssembler::toModel)
+                                    .collect(Collectors.toList());
+        } else if (0 == n) {
+            wastes = wasteRepository.findByUserOrderByIdDesc(currentUser)
+                                    .stream()
+                                    .map(wasteModelAssembler::toModel)
+                                    .collect(Collectors.toList());
+        } else {
+            wastes = Arrays.stream((Waste[]) Arrays.copyOfRange(wasteRepository.findByUserOrderByIdDesc(currentUser).toArray(),
+                                                                0,
+                                                                n.intValue()))
+                           .map(wasteModelAssembler::toModel)
+                           .collect(Collectors.toList());
+        }
+
+        return CollectionModel.of(wastes);
+    }
+
     @GetMapping("")
     public CollectionModel<EntityModel<User>> getUserAll() {
         List<EntityModel<User>> users =
@@ -127,56 +159,56 @@ public class UserController {
     }
 
 
-    @GetMapping("/{id}")
-    public EntityModel<User> getUserSingle(@PathVariable(value = "id") Long id) {
+    @GetMapping("/{username}")
+    public EntityModel<User> getUserSingle(@PathVariable(value = "username") String username) {
 
         User referencedUser =
-                userRepository.findById(id)
-                              .orElseThrow(() -> new ResourceNotFoundException("User with ID="
-                                                                               + id
+                userRepository.findByUsername(username)
+                              .orElseThrow(() -> new ResourceNotFoundException("User with username="
+                                                                               + username
                                                                                + " could not be found."));
 
         return userModelAssembler.toModel(referencedUser);
     }
 
-    // TODO: enable updating on all fields in User
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id,
-                                        @RequestParam(value = "name") String name) {
+//    // TODO: enable updating on all fields in User
+//    @PutMapping("/{username}")
+//    public ResponseEntity<?> updateUser(@PathVariable String username,
+//                                        @RequestParam(value = "name") String name) {
+//
+//        User updatedUser =
+//                userRepository.findByUsername()
+//                              .map(user -> {
+//                                  user.setUsername(name);
+//                                  return userRepository.save(user);
+//                              })
+//                              .orElseThrow(() -> new ResourceNotFoundException("User with ID="
+//                                                                               + id
+//                                                                               + " could not be found."));
+//
+//        EntityModel<User> entityModel = userModelAssembler.toModel(updatedUser);
+//
+//        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
+//                                                 .toUri())
+//                             .body(entityModel);
+//    }
 
-        User updatedUser =
-                userRepository.findById(id)
-                              .map(user -> {
-                                  user.setUsername(name);
-                                  return userRepository.save(user);
-                              })
-                              .orElseThrow(() -> new ResourceNotFoundException("User with ID="
-                                                                               + id
-                                                                               + " could not be found."));
+    @DeleteMapping("/{username}")
+    public ResponseEntity<?> deleteUser(@PathVariable String username) {
 
-        EntityModel<User> entityModel = userModelAssembler.toModel(updatedUser);
-
-        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
-                                                 .toUri())
-                             .body(entityModel);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-
-        userRepository.deleteById(id);
+        userRepository.deleteByUsername(username);
 
         return ResponseEntity.noContent().build();
     }
 
 
-    @GetMapping("/{userid}/wastes")
-    public CollectionModel<EntityModel<Waste>> getWasteAllByUser(@PathVariable(value = "userid") Long userId,
+    @GetMapping("/{username}/wastes")
+    public CollectionModel<EntityModel<Waste>> getWasteAllByUser(@PathVariable(value = "username") String username,
                                                                  @RequestParam(value = "n", defaultValue = "0") Long n) {
 
-        User referencedUser = userRepository.findById(userId)
-                                            .orElseThrow(() -> new ResourceNotFoundException("User with ID="
-                                                                                             + userId
+        User referencedUser = userRepository.findByUsername(username)
+                                            .orElseThrow(() -> new ResourceNotFoundException("User with username="
+                                                                                             + username
                                                                                              + " could not be found."));
 
         List<EntityModel<Waste>> wastes;
@@ -202,13 +234,27 @@ public class UserController {
         return CollectionModel.of(wastes);
     }
 
-    // TODO: only update credit every once in a while, or only a new waste has been submitted?
-    @GetMapping("/{userid}/credit")
-    public int getCreditByUser(@PathVariable(value = "userid") Long userId) throws Exception {
+    @GetMapping("/{username}/credit")
+    public int getCreditByUser(@PathVariable(value = "username") String username) throws Exception {
 
-        User referencedUser = userRepository.findById(userId)
-                                            .orElseThrow(() -> new ResourceNotFoundException("User with ID="
-                                                                                             + userId
+        User referencedUser = userRepository.findByUsername(username)
+                                            .orElseThrow(() -> new ResourceNotFoundException("User with username="
+                                                                                             + username
+                                                                                             + " could not be found."));
+
+        updateCredit(referencedUser, false);
+        userRepository.save(referencedUser);
+
+
+        return referencedUser.getCredit();
+    }
+
+    @GetMapping("/me/credit")
+    public int getCreditByToken(@AuthenticationPrincipal UserDetails userDetails) throws Exception {
+
+        User referencedUser = userRepository.findByUsername(userDetails.getUsername())
+                                            .orElseThrow(() -> new ResourceNotFoundException("User with username="
+                                                                                             + userDetails.getUsername()
                                                                                              + " could not be found."));
 
         updateCredit(referencedUser, false);
@@ -268,14 +314,35 @@ public class UserController {
         referencedUser.setTimeLastUpdatedCredit(LocalDateTime.now());
     }
 
-    @GetMapping("/{userid}/ranking")
-    public PersonalRankingData getPersonalRanking(@PathVariable(value = "userid") Long userId) throws Exception {
+    @GetMapping("/{username}/ranking")
+    public PersonalRankingData getPersonalRanking(@PathVariable(value = "username") String username) throws Exception {
         // TODO: make async
         updateRanking();
 
-        User referencedUser = userRepository.findById(userId)
-                                            .orElseThrow(() -> new ResourceNotFoundException("User with ID="
-                                                                                             + userId
+        User referencedUser = userRepository.findByUsername(username)
+                                            .orElseThrow(() -> new ResourceNotFoundException("User with username="
+                                                                                             + username
+                                                                                             + " could not be found."));
+
+        School referencedSchool = schoolRepository.findById(referencedUser.getSchool().getId())
+                                                  .orElseThrow(() -> new ResourceNotFoundException("User has an invalid school."));
+
+        PersonalRankingData personalRankingData = new PersonalRankingData(referencedUser.getSchoolRanking(),
+                                                                          referencedSchool.getStudentCount(),
+                                                                          referencedUser.getCollegeRanking(),
+                                                                          collegeStudentCountCache);
+
+        return personalRankingData;
+    }
+
+    @GetMapping("/me/ranking")
+    public PersonalRankingData getPersonalRankingByToken(@AuthenticationPrincipal UserDetails userDetails) throws Exception {
+        // TODO: make async
+        updateRanking();
+
+        User referencedUser = userRepository.findByUsername(userDetails.getUsername())
+                                            .orElseThrow(() -> new ResourceNotFoundException("User with username="
+                                                                                             + userDetails.getUsername()
                                                                                              + " could not be found."));
 
         School referencedSchool = schoolRepository.findById(referencedUser.getSchool().getId())

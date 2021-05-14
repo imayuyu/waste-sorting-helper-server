@@ -57,9 +57,9 @@ public class WasteController {
     @PostMapping("")
     public ResponseEntity<?> addWaste(@RequestBody WasteForm wasteForm) throws Exception {
 
-        User referencedUser = userRepository.findById(wasteForm.getUserId())
-                                            .orElseThrow(() -> new ResourceNotFoundException("User with ID="
-                                                                                             + wasteForm.getUserId()
+        User referencedUser = userRepository.findByUsername(wasteForm.getUsername())
+                                            .orElseThrow(() -> new ResourceNotFoundException("User with username="
+                                                                                             + wasteForm.getUsername()
                                                                                              + " could not be found."));
         Dustbin referencedDustbin = dustbinRepository.findById(wasteForm.getDustbinId())
                                                      .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
@@ -157,7 +157,7 @@ public class WasteController {
 class WasteForm {
     private WasteCategory category;
     private String time = "";
-    private Long userId;
+    private String username;
     private Double weight;
     private Long dustbinId;
     private Boolean isCorrectlyCategorized;
@@ -166,13 +166,13 @@ class WasteForm {
 
     }
 
-    public WasteForm(Long userId,
+    public WasteForm(String username,
                      Long dustbinId,
                      Double weight,
                      WasteCategory category,
                      String time,
                      Boolean isCorrectlyCategorized) {
-        this.userId = userId;
+        this.username = username;
         this.category = category;
         this.time = time;
         this.weight = weight;
@@ -180,13 +180,13 @@ class WasteForm {
         this.isCorrectlyCategorized = isCorrectlyCategorized;
     }
 
-    public WasteForm(Long userId,
+    public WasteForm(String username,
                      Long dustbinId,
                      Double weight,
                      WasteCategory category,
                      Boolean isCorrectlyCategorized
                     ) {
-        this.userId = userId;
+        this.username = username;
         this.category = category;
         this.weight = weight;
         this.dustbinId = dustbinId;
@@ -209,12 +209,12 @@ class WasteForm {
         this.time = time;
     }
 
-    public Long getUserId() {
-        return userId;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public Double getWeight() {

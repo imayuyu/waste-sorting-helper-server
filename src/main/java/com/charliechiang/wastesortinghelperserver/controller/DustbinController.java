@@ -12,6 +12,8 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -156,17 +158,41 @@ public class DustbinController {
                                           .withSelfRel());
     }
 
-    @PostMapping("/{id}/requests")
-    public ResponseEntity<?> sendOpenLidRequest(@PathVariable Long id,
-                                                @RequestBody LidOpenRequestForm lidOpenRequestForm) {
+//    @PostMapping("/{id}/requests")
+//    public ResponseEntity<?> sendOpenLidRequest(@PathVariable Long id,
+//                                                @RequestBody LidOpenRequestForm lidOpenRequestForm) {
+//
+//        userRepository.findByUsername(lidOpenRequestForm.getUsername())
+//                      .orElseThrow(() -> new ResourceNotFoundException("User with username="
+//                                                                       + lidOpenRequestForm.getUsername()
+//                                                                       + " could not be found."));
+//
+//        ServerRequest generatedRequest = ServerRequest.generateNewRequest(lidOpenRequestForm.getUsername(),
+//                                                                          lidOpenRequestForm.getDustbinId());
+//        try {
+//            WebSocketController.sendRequest(generatedRequest);
+//        } catch (Exception ex) {
+//            throw new ResourceNotFoundException(ex.getMessage());
+//        }
+//
+//        EntityModel<ServerRequest> entityModel = EntityModel.of(generatedRequest,
+//                                                                linkTo(methodOn(DustbinController.class).getRequestSingle(generatedRequest.getDustbinId(),
+//                                                                                                                          generatedRequest.getRequestId())).withSelfRel());
+//
+//        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
+//    }
 
-        userRepository.findById(lidOpenRequestForm.getUserId())
-                      .orElseThrow(() -> new ResourceNotFoundException("User with ID="
-                                                                       + lidOpenRequestForm.getUserId()
+    @PostMapping("/{id}/requests")
+    public ResponseEntity<?> sendOpenLidRequestByToken(@PathVariable Long id,
+                                                       @AuthenticationPrincipal UserDetails userDetails) {
+
+        userRepository.findByUsername(userDetails.getUsername())
+                      .orElseThrow(() -> new ResourceNotFoundException("User with username="
+                                                                       + userDetails.getUsername()
                                                                        + " could not be found."));
 
-        ServerRequest generatedRequest = ServerRequest.generateNewRequest(lidOpenRequestForm.getUserId(),
-                                                                          lidOpenRequestForm.getDustbinId());
+        ServerRequest generatedRequest = ServerRequest.generateNewRequest(userDetails.getUsername(),
+                                                                          id);
         try {
             WebSocketController.sendRequest(generatedRequest);
         } catch (Exception ex) {
@@ -192,11 +218,11 @@ public class DustbinController {
 
 class LidOpenRequestForm {
     private Long dustbinId;
-    private Long userId;
+    private String username;
 
-    public LidOpenRequestForm(Long dustbinId, Long userId) {
+    public LidOpenRequestForm(Long dustbinId, String username) {
         this.dustbinId = dustbinId;
-        this.userId = userId;
+        this.username = username;
     }
 
     public Long getDustbinId() {
@@ -207,11 +233,11 @@ class LidOpenRequestForm {
         this.dustbinId = dustbinId;
     }
 
-    public Long getUserId() {
-        return userId;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

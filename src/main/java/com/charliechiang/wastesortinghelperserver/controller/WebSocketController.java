@@ -69,7 +69,7 @@ public class WebSocketController {
 
         Integer type = null;
         Long requestId = null;
-        Long userId = null;
+        String username = null;
         Long dustbinId = null;
         String description = null;
 
@@ -78,7 +78,7 @@ public class WebSocketController {
                 JSONObject jsonObject = JSON.parseObject(message);
                 type = jsonObject.getInteger("type");
                 requestId = jsonObject.getLong("requestId");
-                userId = jsonObject.getLong("userId");
+                username = jsonObject.getString("username");
                 dustbinId = jsonObject.getLong("dustbinId");
                 description = jsonObject.getString("description");
             } catch (Exception ex) {
@@ -88,11 +88,11 @@ public class WebSocketController {
         }
 
 
-        if (type == null || requestId == null || userId == null || dustbinId == null || description == null) {
+        if (type == null || requestId == null || username == null || dustbinId == null || description == null) {
             return;
         }
 
-        ServerRequest serverRequest = new ServerRequest(type, requestId, userId, dustbinId, description);
+        ServerRequest serverRequest = new ServerRequest(type, requestId, username, dustbinId, description);
 
         messageHistory.remove(serverRequest.getRequestId());
         messageHistory.put(serverRequest.getRequestId(), serverRequest);
@@ -145,29 +145,29 @@ class ServerRequest {
     //            | 2    | request has not been processed        |
     private Integer type;
     private Long requestId;
-    private Long userId;
+    private String username;
     private Long dustbinId;
     private String description;
 
-    public static ServerRequest generateNewRequest(Long userId,
+    public static ServerRequest generateNewRequest(String username,
                                                    Long dustbinId) {
 
         return new ServerRequest(2,
                                  System.currentTimeMillis(),
-                                 userId,
+                                 username,
                                  dustbinId,
                                  "(Auto-generated) Lid-open");
     }
 
     public ServerRequest(Integer type,
                          Long requestId,
-                         Long userId,
+                         String username,
                          Long dustbinId,
                          String description) {
 
         this.type = type;
         this.requestId = requestId;
-        this.userId = userId;
+        this.username = username;
         this.dustbinId = dustbinId;
         this.description = description;
     }
@@ -188,12 +188,12 @@ class ServerRequest {
         this.requestId = requestId;
     }
 
-    public Long getUserId() {
-        return userId;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public Long getDustbinId() {
