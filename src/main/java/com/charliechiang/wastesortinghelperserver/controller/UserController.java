@@ -76,7 +76,7 @@ public class UserController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @GetMapping("me")
+    @GetMapping("/me")
     public EntityModel<User> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         User currentUser =
                 userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new ResourceNotFoundException(
@@ -87,7 +87,7 @@ public class UserController {
         return userModelAssembler.toModel(currentUser);
     }
 
-    @GetMapping("me/wastes")
+    @GetMapping("/me/wastes")
     public CollectionModel<EntityModel<Waste>> getCurrentUserWasteList(@AuthenticationPrincipal UserDetails userDetails,
                                                                        @RequestParam(value = "n", defaultValue = "0") Long n) {
         User currentUser =
@@ -135,7 +135,7 @@ public class UserController {
     public ResponseEntity<?> addUser(@RequestBody UserCreationForm userCreationForm) {
 
         Optional<User> referencedUser = userRepository.findByUsername(userCreationForm.getUsername());
-        if (referencedUser.isPresent()) {
+        if (referencedUser.isPresent() || userCreationForm.getUsername().equals("me")) {
             throw new ResourceConflictException("User with username=" + userCreationForm.getUsername() + " already exists" +
                                                 ".");
         }

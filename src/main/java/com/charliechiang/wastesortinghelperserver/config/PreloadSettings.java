@@ -48,7 +48,7 @@ public class PreloadSettings {
         if (admin.isEmpty()) {
             User newAdmin = new User();
             newAdmin.setUsername("admin");
-            newAdmin.setPassword(passwordEncoder.encode("78QjIthLby1K"));
+            newAdmin.setPassword(passwordEncoder.encode(""));
             newAdmin.setRoles(Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
             userRepository.save(newAdmin);
         }

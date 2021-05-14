@@ -89,29 +89,29 @@ public class DustbinController {
                              .body(entityModel);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateDustbin(@PathVariable(value = "id") Long id,
-                                           @RequestBody Dustbin newDustbin) {
-
-        Dustbin updatedDustbin =
-                dustbinRepository.findById(id)
-                                 .map(dustbin -> {
-                                     dustbin.setName(newDustbin.getName());
-                                     dustbin.setLongitude(newDustbin.getLongitude());
-                                     dustbin.setLatitude(newDustbin.getLatitude());
-                                     dustbin.setFull(newDustbin.getFull());
-                                     return dustbinRepository.save(dustbin);
-                                 })
-                                 .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
-                                                                                  + id
-                                                                                  + " could not be found."));
-
-        EntityModel<Dustbin> entityModel = dustbinModelAssembler.toModel(updatedDustbin);
-
-        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
-                                                 .toUri())
-                             .body(entityModel);
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<?> updateDustbin(@PathVariable(value = "id") Long id,
+//                                           @RequestBody Dustbin newDustbin) {
+//
+//        Dustbin updatedDustbin =
+//                dustbinRepository.findById(id)
+//                                 .map(dustbin -> {
+//                                     dustbin.setName(newDustbin.getName());
+//                                     dustbin.setLongitude(newDustbin.getLongitude());
+//                                     dustbin.setLatitude(newDustbin.getLatitude());
+//                                     dustbin.setFull(newDustbin.getFull());
+//                                     return dustbinRepository.save(dustbin);
+//                                 })
+//                                 .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
+//                                                                                  + id
+//                                                                                  + " could not be found."));
+//
+//        EntityModel<Dustbin> entityModel = dustbinModelAssembler.toModel(updatedDustbin);
+//
+//        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
+//                                                 .toUri())
+//                             .body(entityModel);
+//    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteDustbin(@PathVariable Long id) {

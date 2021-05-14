@@ -33,7 +33,7 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
             throws IOException, ServletException {
 
         String token = resolveToken((HttpServletRequest) req);
-        log.info("Extracting token from HttpServletRequest: " + token);
+//        log.info("Extracting token from HttpServletRequest: " + token);
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Authentication auth = jwtTokenProvider.getAuthentication(token);
