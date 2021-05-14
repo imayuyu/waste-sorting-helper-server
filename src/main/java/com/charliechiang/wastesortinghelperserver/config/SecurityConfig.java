@@ -34,18 +34,46 @@ public class SecurityConfig {
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(c -> c.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeRequests(c -> c
+                                           // ---------- AuthenticationController ----------
+                                           // Permit All - sign in
                                            .antMatchers("/api/v1/auth/signin").permitAll()
-                                           .antMatchers("/api/v1/ws/**").permitAll()
-                                           .antMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
-                                           .antMatchers(HttpMethod.POST, "/api/v1/wastes/**").permitAll()
-                                           .antMatchers("/api/v1/settings/**").hasRole("ADMIN")
-                                           .antMatchers(HttpMethod.POST,"/api/v1/dustbins/*/full").permitAll()
-                                           .antMatchers(HttpMethod.DELETE, "/api/v1/dustbins/**").hasRole("ADMIN")
-                                           .antMatchers(HttpMethod.PUT, "/api/v1/dustbins/**").hasRole("ADMIN")
+
+                                           // ---------- DustbinController ----------
+                                           // Admin only - add dustbins
                                            .antMatchers(HttpMethod.POST, "/api/v1/dustbins").hasRole("ADMIN")
+                                           // Admin only - delete dustbins
+                                           .antMatchers(HttpMethod.DELETE, "/api/v1/dustbins/**").hasRole("ADMIN")
+                                           // Permit All - allow dustbins to change whether it is full
+                                           .antMatchers(HttpMethod.POST,"/api/v1/dustbins/*/full").permitAll()
+
+                                           // ---------- SchoolController ----------
+                                           // Admin only - add schools
                                            .antMatchers(HttpMethod.POST, "/api/v1/schools/**").hasRole("ADMIN")
+                                           // Admin only - delete schools
                                            .antMatchers(HttpMethod.DELETE, "/api/v1/schools/**").hasRole("ADMIN")
-                                           .antMatchers("/api/v1/dustbins/*/full").permitAll()
+
+                                           // ServerSettingsController
+                                           // Admin only - change server settings
+                                           .antMatchers("/api/v1/settings/**").hasRole("ADMIN")
+
+                                           // ---------- UserController ----------
+                                           // Admin only - get user list
+                                           .antMatchers(HttpMethod.GET,"/api/v1/users").hasRole("ADMIN")
+                                           // Permit All - sign up
+                                           .antMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+                                           // Authenticate - about me
+                                           .antMatchers(HttpMethod.GET, "/api/v1/users/me/**").authenticated()
+                                           // Admin only - get a user
+                                           .antMatchers(HttpMethod.GET,"/api/v1/users/**").hasRole("ADMIN")
+
+                                           // ---------- WasteController ----------
+                                           // Permit All - allow dustbins to post wastes and incorrect categorizations
+                                           .antMatchers(HttpMethod.POST, "/api/v1/wastes/**").permitAll()
+
+                                           // ---------- WebSocketController ----------
+                                           // Permit All - websocket for dustbins
+                                           .antMatchers("/api/v1/ws/**").permitAll()
+
                                            .anyRequest().authenticated()
                                   )
                 .addFilterBefore(new JwtTokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)

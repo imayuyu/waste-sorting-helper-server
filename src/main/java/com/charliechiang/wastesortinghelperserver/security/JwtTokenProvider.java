@@ -59,7 +59,7 @@ public class JwtTokenProvider {
             claims.put(AUTHORITIES_KEY, authorities.stream().map(GrantedAuthority::getAuthority).collect(joining(",")));
         }
         Long validityDelay = ServerSettingsController.getServerSetting("tokenExpirationDelay", serverSettingsRepository);
-        log.info(validityDelay);
+//        log.info(validityDelay);
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityDelay.longValue() * 1000);
 
@@ -91,7 +91,7 @@ public class JwtTokenProvider {
                     .parserBuilder().setSigningKey(this.secretKey).build()
                     .parseClaimsJws(token);
             //  parseClaimsJws will check expiration date. No need do here.
-            log.info("expiration date: " + claims.getBody().getExpiration());
+//            log.info("expiration date: " + claims.getBody().getExpiration());
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             log.info("Invalid JWT token: " + e.getMessage());
