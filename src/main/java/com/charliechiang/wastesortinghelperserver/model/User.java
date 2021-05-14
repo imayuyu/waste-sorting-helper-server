@@ -52,6 +52,7 @@ public class User implements UserDetails {
     private String unionId;
     @JsonBackReference
     private Boolean needFullCreditUpdate = false;
+    @JsonBackReference
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles = new ArrayList<>();
 
