@@ -123,7 +123,7 @@ public class DustbinController {
 
     @PostMapping("/{id}/full")
     public ResponseEntity<?> updateDustbinFull(@PathVariable Long id,
-                                               @RequestParam(value = "isFull") Boolean isFull) {
+                                               @RequestBody DustbinFullForm dustbinFullForm) {
 
         Dustbin referencedDustbin = dustbinRepository.findById(id)
                                                      .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
@@ -131,7 +131,10 @@ public class DustbinController {
                                                                                                       + " could not " +
                                                                                                       "be found."));
 
-        referencedDustbin.setFull(isFull);
+        referencedDustbin.setFoodWasteFull(dustbinFullForm.getFoodWasteFull());
+        referencedDustbin.setHazardousWasteFull(dustbinFullForm.getHazardousWasteFull());
+        referencedDustbin.setRecyclableWasteFull(dustbinFullForm.getRecyclableWasteFull());
+        referencedDustbin.setResidualWasteFull(dustbinFullForm.getResidualWasteFull());
 
         EntityModel<Dustbin> entityModel =
                 dustbinModelAssembler.toModel(dustbinRepository.save(referencedDustbin));
@@ -239,5 +242,48 @@ class LidOpenRequestForm {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+}
+
+class DustbinFullForm {
+    private Boolean isHazardousWasteFull;
+    private Boolean isRecyclableWasteFull;
+    private Boolean isFoodWasteFull;
+    private Boolean isResidualWasteFull;
+
+    public DustbinFullForm() {
+
+    }
+
+    public Boolean getHazardousWasteFull() {
+        return isHazardousWasteFull;
+    }
+
+    public void setHazardousWasteFull(Boolean hazardousWasteFull) {
+        isHazardousWasteFull = hazardousWasteFull;
+    }
+
+    public Boolean getRecyclableWasteFull() {
+        return isRecyclableWasteFull;
+    }
+
+    public void setRecyclableWasteFull(Boolean recyclableWasteFull) {
+        isRecyclableWasteFull = recyclableWasteFull;
+    }
+
+    public Boolean getFoodWasteFull() {
+        return isFoodWasteFull;
+    }
+
+    public void setFoodWasteFull(Boolean foodWasteFull) {
+        isFoodWasteFull = foodWasteFull;
+    }
+
+    public Boolean getResidualWasteFull() {
+        return isResidualWasteFull;
+    }
+
+    public void setResidualWasteFull(Boolean residualWasteFull) {
+        isResidualWasteFull = residualWasteFull;
     }
 }

@@ -13,7 +13,10 @@ public class Dustbin {
     private String name;
     private Double latitude;
     private Double longitude;
-    private Boolean isFull;
+    private Boolean isHazardousWasteFull;
+    private Boolean isRecyclableWasteFull;
+    private Boolean isFoodWasteFull;
+    private Boolean isResidualWasteFull;
 
 
     public Dustbin() {
@@ -23,7 +26,6 @@ public class Dustbin {
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.isFull = false;
     }
 
     public Long getId() {
@@ -58,12 +60,35 @@ public class Dustbin {
         this.longitude = longitude;
     }
 
-    public Boolean getFull() {
-        return isFull;
+    public Boolean getHazardousWasteFull() {
+        return isHazardousWasteFull;
     }
 
-    public void setFull(Boolean full) {
-        isFull = full;
+    public void setHazardousWasteFull(Boolean hazardousWasteFull) {
+        isHazardousWasteFull = hazardousWasteFull;
     }
 
+    public Boolean getRecyclableWasteFull() {
+        return isRecyclableWasteFull;
+    }
+
+    public void setRecyclableWasteFull(Boolean recyclableWasteFull) {
+        isRecyclableWasteFull = recyclableWasteFull;
+    }
+
+    public Boolean getFoodWasteFull() {
+        return isFoodWasteFull;
+    }
+
+    public void setFoodWasteFull(Boolean foodWasteFull) {
+        isFoodWasteFull = foodWasteFull;
+    }
+
+    public Boolean getResidualWasteFull() {
+        return isResidualWasteFull;
+    }
+
+    public void setResidualWasteFull(Boolean residualWasteFull) {
+        isResidualWasteFull = residualWasteFull;
+    }
 }
