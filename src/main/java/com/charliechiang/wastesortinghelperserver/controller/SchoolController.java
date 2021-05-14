@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
+@RequestMapping("/api/v1/schools")
 public class SchoolController {
     private final SchoolRepository schoolRepository;
     private final SchoolModelAssembler schoolModelAssembler;
@@ -32,7 +34,7 @@ public class SchoolController {
         this.schoolModelAssembler=schoolModelAssembler;
     }
 
-    @GetMapping("/api/schools")
+    @GetMapping("")
     public CollectionModel<EntityModel<School>> getSchoolAll() {
         List<EntityModel<School>> schools =
                 schoolRepository.findAll()
@@ -45,7 +47,7 @@ public class SchoolController {
                                  .withSelfRel());
     }
 
-    @GetMapping("/api/schools/{id}")
+    @GetMapping("/{id}")
     public EntityModel<School> getSchoolSingle(@PathVariable Long id) {
         School referencedSchool =
                 schoolRepository.findById(id)
@@ -54,7 +56,7 @@ public class SchoolController {
         return schoolModelAssembler.toModel(referencedSchool);
     }
 
-    @PostMapping("/api/schools")
+    @PostMapping("")
     public ResponseEntity<?> addSchool(@RequestBody(required = false) School newSchool){
         EntityModel<School> entityModel=
                 schoolModelAssembler.toModel(schoolRepository.save(newSchool));
@@ -64,7 +66,7 @@ public class SchoolController {
                 .body(entityModel);
     }
 
-    @DeleteMapping("/api/schools/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteDustbin(@PathVariable Long id){
         schoolRepository.deleteById(id);
 

@@ -1,20 +1,35 @@
 package com.charliechiang.wastesortinghelperserver.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "user")
-public class User {
+public class User implements UserDetails {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private String name;
+    private String realName;
+    private String username;
+    @JsonBackReference
+    private String password;
     @ManyToOne
     @JoinColumn(name = "school_id", referencedColumnName = "id")
     private School school;
@@ -34,15 +49,19 @@ public class User {
     private String sessionKey;
     @JsonBackReference
     private String unionId;
+    @JsonBackReference
+    private Boolean needFullCreditUpdate = false;
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<String> roles=new ArrayList<>();
 
     public User() {
 
     }
 
 
-    public User(Long id, String name) {
+    public User(Long id, String username) {
         this.id = id;
-        this.name = name;
+        this.username = username;
     }
 
     public Long getId() {
@@ -53,20 +72,58 @@ public class User {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public int getCredit() {
-        return credit;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public void setCredit(Integer credit) {
-        this.credit = credit;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.roles
+                .stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    public String getRealName() {
+        return realName;
+    }
+
+    public void setRealName(String realName) {
+        this.realName = realName;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public School getSchool() {
@@ -83,6 +140,14 @@ public class User {
 
     public void setTimeOfEnrollment(Short timeOfEnrollment) {
         this.timeOfEnrollment = timeOfEnrollment;
+    }
+
+    public Integer getCredit() {
+        return credit;
+    }
+
+    public void setCredit(Integer credit) {
+        this.credit = credit;
     }
 
     public Integer getSchoolRanking() {
@@ -147,5 +212,21 @@ public class User {
 
     public void setUnionId(String unionId) {
         this.unionId = unionId;
+    }
+
+    public Boolean getNeedFullCreditUpdate() {
+        return needFullCreditUpdate;
+    }
+
+    public void setNeedFullCreditUpdate(Boolean needFullCreditUpdate) {
+        this.needFullCreditUpdate = needFullCreditUpdate;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 }

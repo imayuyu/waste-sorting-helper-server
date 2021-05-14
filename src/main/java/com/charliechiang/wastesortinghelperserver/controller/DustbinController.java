@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,6 +29,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
+@RequestMapping("/api/v1/dustbins")
 public class DustbinController {
 
     private final DustbinRepository dustbinRepository;
@@ -49,7 +51,7 @@ public class DustbinController {
         this.dustbinModelAssembler = dustbinModelAssembler;
     }
 
-    @GetMapping("/api/dustbins")
+    @GetMapping("")
     public CollectionModel<EntityModel<Dustbin>> getDustbinAll() {
 
         List<EntityModel<Dustbin>> dustbins =
@@ -63,7 +65,7 @@ public class DustbinController {
                                           .withSelfRel());
     }
 
-    @GetMapping("/api/dustbins/{id}")
+    @GetMapping("/{id}")
     public EntityModel<Dustbin> getDustbinSingle(@PathVariable Long id) {
 
         Dustbin referencedDustbin =
@@ -74,7 +76,7 @@ public class DustbinController {
         return dustbinModelAssembler.toModel(referencedDustbin);
     }
 
-    @PostMapping("/api/dustbins")
+    @PostMapping("")
     public ResponseEntity<?> addDustbin(@RequestBody Dustbin newDustbin) {
 
         EntityModel<Dustbin> entityModel =
@@ -85,7 +87,7 @@ public class DustbinController {
                              .body(entityModel);
     }
 
-    @PutMapping("/api/dustbins/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateDustbin(@PathVariable(value = "id") Long id,
                                            @RequestBody Dustbin newDustbin) {
 
@@ -109,7 +111,7 @@ public class DustbinController {
                              .body(entityModel);
     }
 
-    @DeleteMapping("/api/dustbins/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteDustbin(@PathVariable Long id) {
 
         dustbinRepository.deleteById(id);
@@ -117,9 +119,9 @@ public class DustbinController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/api/dustbins/{id}/full")
+    @PostMapping("/{id}/full")
     public ResponseEntity<?> updateDustbinFull(@PathVariable Long id,
-                                               @RequestParam(value = "isfull") Boolean isFull) {
+                                               @RequestParam(value = "isFull") Boolean isFull) {
 
         Dustbin referencedDustbin = dustbinRepository.findById(id)
                                                      .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
@@ -137,7 +139,7 @@ public class DustbinController {
                              .body(entityModel);
     }
 
-    @GetMapping("/api/dustbins/{id}/wastes")
+    @GetMapping("/{id}/wastes")
     public CollectionModel<EntityModel<Waste>> getWasteAllByDustbin(@PathVariable Long id) {
 
         List<EntityModel<Waste>> wastes =
@@ -154,7 +156,7 @@ public class DustbinController {
                                           .withSelfRel());
     }
 
-    @PostMapping("/api/dustbins/{id}/requests")
+    @PostMapping("/{id}/requests")
     public ResponseEntity<?> sendOpenLidRequest(@PathVariable Long id,
                                                 @RequestBody LidOpenRequestForm lidOpenRequestForm) {
 
@@ -178,7 +180,7 @@ public class DustbinController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
-    @GetMapping("/api/dustbins/{dustbinId}/requests/{requestId}")
+    @GetMapping("/{dustbinId}/requests/{requestId}")
     public EntityModel<ServerRequest> getRequestSingle(@PathVariable Long dustbinId,
                                                        @PathVariable Long requestId) {
 

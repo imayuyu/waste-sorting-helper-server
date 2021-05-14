@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,6 +32,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
+@RequestMapping("/api/v1/wastes")
 public class WasteController {
     private final DustbinRepository dustbinRepository;
     private final UserRepository userRepository;
@@ -52,8 +54,8 @@ public class WasteController {
         this.userController=userController;
     }
 
-    @PostMapping("/api/wastes")
-    public ResponseEntity<?> addWaste(@RequestBody WasteForm wasteForm) {
+    @PostMapping("")
+    public ResponseEntity<?> addWaste(@RequestBody WasteForm wasteForm) throws Exception {
 
         User referencedUser = userRepository.findById(wasteForm.getUserId())
                                             .orElseThrow(() -> new ResourceNotFoundException("User with ID="
@@ -81,14 +83,14 @@ public class WasteController {
                                                                            submissionLocalDateTime)));
 
         // TODO: make async
-        userController.updateCredit(referencedUser);
+        userController.updateCredit(referencedUser, false);
 
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF)
                                                  .toUri())
                              .body(entityModel);
     }
 
-    @GetMapping("/api/wastes/{id}")
+    @GetMapping("/{id}")
     public EntityModel<Waste> getWasteSingle(@PathVariable Long id) {
 
         return wasteModelAssembler.toModel(wasteRepository.findById(id)
@@ -98,7 +100,7 @@ public class WasteController {
                                                                                                            + " could not be found.")));
     }
 
-    @GetMapping("/api/wastes")
+    @GetMapping("")
     public CollectionModel<EntityModel<Waste>> getWasteAll() {
 
         List<EntityModel<Waste>> wastes =
@@ -113,8 +115,8 @@ public class WasteController {
     }
 
 
-    @PostMapping("/api/wastes/actions/report-incorrect-categorization")
-    public ResponseEntity<?> reportIncorrectCategorization(@RequestParam(value = "dustbinid") Long dustbinId,
+    @PostMapping("/actions/report-incorrect-categorization")
+    public ResponseEntity<?> reportIncorrectCategorization(@RequestParam(value = "dustbinId") Long dustbinId,
                                                            @RequestParam(value = "time") String submissionTime) {
         Dustbin referencedDustbin = dustbinRepository.findById(dustbinId)
                                                      .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
@@ -135,6 +137,9 @@ public class WasteController {
             if (submissionLocalDateTime.isAfter(i.getTime())) {
                 suggestedWaste = i;
                 suggestedWaste.setCorrectlyCategorized(false);
+
+                suggestedWaste.getUser().setNeedFullCreditUpdate(true);
+                userRepository.save(suggestedWaste.getUser());
 
                 EntityModel<Waste> entityModel = wasteModelAssembler.toModel(wasteRepository.save(suggestedWaste));
 

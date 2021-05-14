@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@ServerEndpoint("/api/ws/dustbins/{dustbinId}")
+@ServerEndpoint("/api/v1/ws/dustbins/{dustbinId}")
 @Component
 public class WebSocketController {
     private static final Log logger = LogFactory.getLog(WebSocketController.class);

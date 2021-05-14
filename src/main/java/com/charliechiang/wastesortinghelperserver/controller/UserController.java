@@ -1,77 +1,126 @@
 package com.charliechiang.wastesortinghelperserver.controller;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import com.charliechiang.wastesortinghelperserver.config.CreditUpdateSettings;
+import com.charliechiang.wastesortinghelperserver.exception.ResourceConflictException;
 import com.charliechiang.wastesortinghelperserver.exception.ResourceNotFoundException;
 import com.charliechiang.wastesortinghelperserver.model.School;
 import com.charliechiang.wastesortinghelperserver.repository.SchoolRepository;
 import com.charliechiang.wastesortinghelperserver.model.User;
 import com.charliechiang.wastesortinghelperserver.model.UserModelAssembler;
+import com.charliechiang.wastesortinghelperserver.repository.ServerSettingsRepository;
 import com.charliechiang.wastesortinghelperserver.repository.UserRepository;
 import com.charliechiang.wastesortinghelperserver.model.Waste;
 import com.charliechiang.wastesortinghelperserver.model.WasteCategory;
 import com.charliechiang.wastesortinghelperserver.model.WasteModelAssembler;
 import com.charliechiang.wastesortinghelperserver.repository.WasteRepository;
+import org.apache.catalina.Server;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
+@RequestMapping("/api/v1/users")
 public class UserController {
     private final UserRepository userRepository;
     private final WasteRepository wasteRepository;
     private final SchoolRepository schoolRepository;
+    private final ServerSettingsRepository serverSettingsRepository;
 
     private final WasteModelAssembler wasteModelAssembler;
     private final UserModelAssembler userModelAssembler;
 
-    private final LocalDateTime lastUpdatedRankingTime = LocalDateTime.of(1970, 1, 1, 1, 1);
+    private final PasswordEncoder passwordEncoder;
+
+    private LocalDateTime lastUpdatedRankingTime = LocalDateTime.of(1970, 1, 1, 1, 1);
 
     private int collegeStudentCountCache;
 
     public UserController(UserRepository userRepository,
                           WasteRepository wasteRepository,
                           SchoolRepository schoolRepository,
+                          ServerSettingsRepository serverSettingsRepository,
                           WasteModelAssembler wasteModelAssembler,
-                          UserModelAssembler userModelAssembler) {
+                          UserModelAssembler userModelAssembler,
+                          PasswordEncoder passwordEncoder) {
 
         this.userRepository = userRepository;
         this.wasteRepository = wasteRepository;
         this.schoolRepository = schoolRepository;
+        this.serverSettingsRepository = serverSettingsRepository;
         this.wasteModelAssembler = wasteModelAssembler;
         this.userModelAssembler = userModelAssembler;
+        this.passwordEncoder = passwordEncoder;
     }
 
+    @GetMapping("me")
+    public EntityModel<User> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        User currentUser =
+                userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new ResourceNotFoundException(
+                "User with username="
+                + userDetails.getUsername()
+                + " could not be found."));
 
-    @PostMapping("/api/users")
+        return userModelAssembler.toModel(currentUser);
+    }
+
+    @GetMapping("")
+    public CollectionModel<EntityModel<User>> getUserAll() {
+        List<EntityModel<User>> users =
+                userRepository.findAll()
+                              .stream()
+                              .map(userModelAssembler::toModel)
+                              .collect(Collectors.toList());
+
+        return CollectionModel.of(users,
+                                  linkTo(methodOn(UserController.class).getUserAll()).withSelfRel());
+    }
+
+    @PostMapping("")
     public ResponseEntity<?> addUser(@RequestBody UserCreationForm userCreationForm) {
+
+        Optional<User> referencedUser = userRepository.findByUsername(userCreationForm.getUsername());
+        if (referencedUser.isPresent()) {
+            throw new ResourceConflictException("User with username=" + userCreationForm.getUsername() + " already exists" +
+                                                ".");
+        }
 
         User newUser = new User();
         // TODO: set password
-        newUser.setId(userCreationForm.getId());
-        newUser.setName(userCreationForm.getName());
+        newUser.setUsername(userCreationForm.getUsername());
+        newUser.setPassword(this.passwordEncoder.encode(userCreationForm.getPassword()));
+        newUser.setRealName(userCreationForm.getRealName());
         newUser.setSchool(schoolRepository.findById(userCreationForm.getSchoolId()).orElseThrow(() -> new ResourceNotFoundException("School with ID=" + userCreationForm.getSchoolId() + " could not be found.")));
         newUser.setTimeOfEnrollment(userCreationForm.getTimeOfEnrollment());
         newUser.setOpenId(userCreationForm.getOpenId());
+        newUser.setRoles(Collections.singletonList("ROLE_USER"));
 
         EntityModel<User> entityModel =
                 userModelAssembler.toModel(userRepository.save(newUser));
@@ -82,7 +131,7 @@ public class UserController {
     }
 
 
-    @GetMapping("/api/users/{id}")
+    @GetMapping("/{id}")
     public EntityModel<User> getUserSingle(@PathVariable(value = "id") Long id) {
 
         User referencedUser =
@@ -95,14 +144,14 @@ public class UserController {
     }
 
     // TODO: enable updating on all fields in User
-    @PutMapping("/api/users/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id,
                                         @RequestParam(value = "name") String name) {
 
         User updatedUser =
                 userRepository.findById(id)
                               .map(user -> {
-                                  user.setName(name);
+                                  user.setUsername(name);
                                   return userRepository.save(user);
                               })
                               .orElseThrow(() -> new ResourceNotFoundException("User with ID="
@@ -116,7 +165,7 @@ public class UserController {
                              .body(entityModel);
     }
 
-    @DeleteMapping("/api/users/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
 
         userRepository.deleteById(id);
@@ -125,7 +174,7 @@ public class UserController {
     }
 
 
-    @GetMapping("/api/users/{userid}/wastes")
+    @GetMapping("/{userid}/wastes")
     public CollectionModel<EntityModel<Waste>> getWasteAllByUser(@PathVariable(value = "userid") Long userId,
                                                                  @RequestParam(value = "n", defaultValue = "0") Long n) {
 
@@ -158,45 +207,58 @@ public class UserController {
     }
 
     // TODO: only update credit every once in a while, or only a new waste has been submitted?
-    @GetMapping("/api/users/{userid}/credit")
-    public int getCreditByUser(@PathVariable(value = "userid") Long userId) {
+    @GetMapping("/{userid}/credit")
+    public int getCreditByUser(@PathVariable(value = "userid") Long userId) throws Exception {
 
         User referencedUser = userRepository.findById(userId)
                                             .orElseThrow(() -> new ResourceNotFoundException("User with ID="
                                                                                              + userId
                                                                                              + " could not be found."));
 
-        updateCredit(referencedUser);
+        updateCredit(referencedUser, false);
         userRepository.save(referencedUser);
 
 
         return referencedUser.getCredit();
     }
 
-    public void updateCredit(User referencedUser) {
-        // TODO: lazy update
-        // TODO: Check if this updates
+    public void updateCredit(User referencedUser, Boolean forceFullUpdate) throws Exception {
         // TODO: 总重超过减分
-        int newCredit = referencedUser.getCredit();
 
-        //        if (referencedUser.getTimeLastUpdatedCredit().plusHours(1).isAfter(LocalDateTime.now()))
-        //            return;
+        if (referencedUser.getNeedFullCreditUpdate()) {
+            forceFullUpdate = true;
+            referencedUser.setNeedFullCreditUpdate(false);
+        }
 
-        ArrayList<Waste> userWastes = wasteRepository.findAllByUserAndTimeIsAfter(referencedUser,
-                                                                                  referencedUser.getTimeLastUpdatedCredit());
+        int newCredit = 0;
+
+        ArrayList<Waste> userWastes = null;
+
+        if (forceFullUpdate) {
+            userWastes = wasteRepository.findAllByUser(referencedUser);
+        } else {
+            if (referencedUser.getTimeLastUpdatedCredit().plusSeconds(ServerSettingsController.getServerSetting(
+                    "creditUpdateDelay", serverSettingsRepository)).isAfter(LocalDateTime.now())) {
+                return;
+            }
+
+            userWastes = wasteRepository.findAllByUserAndTimeIsAfter(referencedUser, referencedUser.getTimeLastUpdatedCredit());
+
+            newCredit = referencedUser.getCredit();
+        }
+
         // 是否正确分类的加分减分
         for (Waste i : userWastes) {
             if (i.getCorrectlyCategorized()) {
                 if (i.getCategory() == WasteCategory.FOOD_WASTE
                     || i.getCategory() == WasteCategory.RECYCLABLE_WASTE) {
                     newCredit++;
-                } else {
-                    newCredit--;
                 }
             } else {
                 newCredit--;
             }
         }
+
         // 总重超过的减分
         //        LocalDateTime startTimeOfTheInterval = LocalDateTime
         //        ArrayList<Waste> userWastesBetweenInterval = wasteRepository.findAllByUserAndTimeIsAfter(this, );
@@ -210,8 +272,8 @@ public class UserController {
         referencedUser.setTimeLastUpdatedCredit(LocalDateTime.now());
     }
 
-    @GetMapping("/api/users/{userid}/ranking")
-    public PersonalRankingData getPersonalRanking(@PathVariable(value = "userid") Long userId) {
+    @GetMapping("/{userid}/ranking")
+    public PersonalRankingData getPersonalRanking(@PathVariable(value = "userid") Long userId) throws Exception {
         // TODO: make async
         updateRanking();
 
@@ -231,11 +293,13 @@ public class UserController {
         return personalRankingData;
     }
 
-    public void updateRanking() {
-        if (lastUpdatedRankingTime.plus(CreditUpdateSettings.RANKING_UPDATE_DELAY, CreditUpdateSettings.RANKING_UPDATE_DELAY_UNIT)
+    public void updateRanking() throws Exception {
+        // Do not do full update everytime
+        if (lastUpdatedRankingTime.plusSeconds(ServerSettingsController.getServerSetting("rankingUpdateDelay", serverSettingsRepository))
                                   .isAfter(LocalDateTime.now())) {
             return;
         }
+
 
         ArrayList<User> collegeRanking = userRepository.findAllByOrderByCreditDesc();
         HashMap<School, ArrayList<User>> schoolRankings = new HashMap<>();
@@ -261,13 +325,18 @@ public class UserController {
                 userRepository.save(thisSchoolRanking.get(j));
             }
         }
+
+        lastUpdatedRankingTime = LocalDateTime.now();
     }
 }
 
 class UserCreationForm {
-    private Long id;
-    private String name;
+    @NotNull
+    private String username;
+    @NotNull
     private String password;
+    @NotNull
+    private String realName;
     private String openId;
     private Long schoolId;
     private Short timeOfEnrollment;
@@ -276,20 +345,12 @@ class UserCreationForm {
 
     }
 
-    public Long getId() {
-        return id;
+    public String getUsername() {
+        return username;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {
@@ -298,6 +359,14 @@ class UserCreationForm {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getRealName() {
+        return realName;
+    }
+
+    public void setRealName(String realName) {
+        this.realName = realName;
     }
 
     public String getOpenId() {
