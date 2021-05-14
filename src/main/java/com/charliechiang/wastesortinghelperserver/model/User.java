@@ -37,10 +37,10 @@ public class User implements UserDetails {
     private Integer credit = 0;
     private Integer schoolRanking = Integer.MAX_VALUE;
     private Integer collegeRanking = Integer.MAX_VALUE;
-    private LocalDateTime timeLastUpdatedCredit = LocalDateTime.of(1970,1,1,1,1);
+    private LocalDateTime timeLastUpdatedCredit = LocalDateTime.of(1970, 1, 1, 1, 1);
     @JsonBackReference
     // the start date of last punished interval
-    private LocalDateTime timeLastPunishedInterval = LocalDateTime.of(1970,1,1,1,1);
+    private LocalDateTime timeLastPunishedInterval = LocalDateTime.of(1970, 1, 1, 1, 1);
     @JsonBackReference
     private String openId;
     @JsonBackReference
@@ -52,7 +52,7 @@ public class User implements UserDetails {
     @JsonBackReference
     private Boolean needFullCreditUpdate = false;
     @ElementCollection(fetch = FetchType.EAGER)
-    private List<String> roles=new ArrayList<>();
+    private List<String> roles = new ArrayList<>();
 
     public User() {
 

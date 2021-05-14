@@ -3,7 +3,6 @@ package com.charliechiang.wastesortinghelperserver.config;
 import com.charliechiang.wastesortinghelperserver.repository.UserRepository;
 import com.charliechiang.wastesortinghelperserver.security.JwtTokenAuthenticationFilter;
 import com.charliechiang.wastesortinghelperserver.security.JwtTokenProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,7 +12,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,12 +32,12 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(c-> c.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .exceptionHandling(c -> c.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeRequests(c -> c
                                            .antMatchers("/api/v1/auth/signin").permitAll()
                                            .antMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
                                            .antMatchers(HttpMethod.POST, "/api/v1/wastes/**").permitAll()
-                                           .antMatchers( "/api/v1/settings/**").hasRole("ADMIN")
+                                           .antMatchers("/api/v1/settings/**").hasRole("ADMIN")
                                            .antMatchers(HttpMethod.DELETE, "/api/v1/dustbins/**").hasRole("ADMIN")
                                            .antMatchers(HttpMethod.PUT, "/api/v1/dustbins/**").hasRole("ADMIN")
                                            .antMatchers(HttpMethod.POST, "/api/v1/dustbins/**").hasRole("ADMIN")

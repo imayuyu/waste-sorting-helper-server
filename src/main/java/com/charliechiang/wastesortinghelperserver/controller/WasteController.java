@@ -1,13 +1,13 @@
 package com.charliechiang.wastesortinghelperserver.controller;
 
-import com.charliechiang.wastesortinghelperserver.model.Dustbin;
-import com.charliechiang.wastesortinghelperserver.repository.DustbinRepository;
 import com.charliechiang.wastesortinghelperserver.exception.ResourceNotFoundException;
+import com.charliechiang.wastesortinghelperserver.model.Dustbin;
 import com.charliechiang.wastesortinghelperserver.model.User;
-import com.charliechiang.wastesortinghelperserver.repository.UserRepository;
 import com.charliechiang.wastesortinghelperserver.model.Waste;
 import com.charliechiang.wastesortinghelperserver.model.WasteCategory;
 import com.charliechiang.wastesortinghelperserver.model.WasteModelAssembler;
+import com.charliechiang.wastesortinghelperserver.repository.DustbinRepository;
+import com.charliechiang.wastesortinghelperserver.repository.UserRepository;
 import com.charliechiang.wastesortinghelperserver.repository.WasteRepository;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -51,7 +51,7 @@ public class WasteController {
         this.userRepository = userRepository;
         this.wasteRepository = wasteRepository;
         this.wasteModelAssembler = wasteModelAssembler;
-        this.userController=userController;
+        this.userController = userController;
     }
 
     @PostMapping("")

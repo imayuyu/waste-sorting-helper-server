@@ -16,8 +16,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
-import org.springframework.web.filter.GenericFilterBean;
-
 public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 
     public static final String HEADER_PREFIX = "Bearer ";
@@ -26,8 +24,8 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    public JwtTokenAuthenticationFilter(JwtTokenProvider jwtTokenProvider){
-        this.jwtTokenProvider=jwtTokenProvider;
+    public JwtTokenAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -35,7 +33,7 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
             throws IOException, ServletException {
 
         String token = resolveToken((HttpServletRequest) req);
-        log.info("Extracting token from HttpServletRequest: "+token);
+        log.info("Extracting token from HttpServletRequest: " + token);
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Authentication auth = jwtTokenProvider.getAuthentication(token);

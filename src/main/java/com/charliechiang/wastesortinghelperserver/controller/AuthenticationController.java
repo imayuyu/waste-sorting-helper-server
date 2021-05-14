@@ -3,19 +3,16 @@ package com.charliechiang.wastesortinghelperserver.controller;
 
 import com.charliechiang.wastesortinghelperserver.repository.UserRepository;
 import com.charliechiang.wastesortinghelperserver.security.JwtTokenProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
-import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpServerErrorException;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -32,11 +29,11 @@ public class AuthenticationController {
     private final UserRepository userRepository;
 
     public AuthenticationController(AuthenticationManager authenticationManager,
-                                 JwtTokenProvider jwtTokenProvider,
-                                 UserRepository userRepository) {
-        this.authenticationManager=authenticationManager;
-        this.jwtTokenProvider=jwtTokenProvider;
-        this.userRepository=userRepository;
+                                    JwtTokenProvider jwtTokenProvider,
+                                    UserRepository userRepository) {
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.userRepository = userRepository;
     }
 
     @PostMapping("/signin")
@@ -69,8 +66,8 @@ class AuthenticationRequest implements Serializable {
 
     public AuthenticationRequest(String username,
                                  String password) {
-        this.username=username;
-        this.password=password;
+        this.username = username;
+        this.password = password;
     }
 
     public static long getSerialVersionUID() {

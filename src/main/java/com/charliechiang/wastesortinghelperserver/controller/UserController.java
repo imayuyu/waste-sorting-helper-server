@@ -1,26 +1,21 @@
 package com.charliechiang.wastesortinghelperserver.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import com.charliechiang.wastesortinghelperserver.exception.ResourceConflictException;
 import com.charliechiang.wastesortinghelperserver.exception.ResourceNotFoundException;
 import com.charliechiang.wastesortinghelperserver.model.School;
-import com.charliechiang.wastesortinghelperserver.repository.SchoolRepository;
 import com.charliechiang.wastesortinghelperserver.model.User;
 import com.charliechiang.wastesortinghelperserver.model.UserModelAssembler;
-import com.charliechiang.wastesortinghelperserver.repository.ServerSettingsRepository;
-import com.charliechiang.wastesortinghelperserver.repository.UserRepository;
 import com.charliechiang.wastesortinghelperserver.model.Waste;
 import com.charliechiang.wastesortinghelperserver.model.WasteCategory;
 import com.charliechiang.wastesortinghelperserver.model.WasteModelAssembler;
+import com.charliechiang.wastesortinghelperserver.repository.SchoolRepository;
+import com.charliechiang.wastesortinghelperserver.repository.ServerSettingsRepository;
+import com.charliechiang.wastesortinghelperserver.repository.UserRepository;
 import com.charliechiang.wastesortinghelperserver.repository.WasteRepository;
-import org.apache.catalina.Server;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,8 +31,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,6 +38,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -84,9 +80,9 @@ public class UserController {
     public EntityModel<User> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         User currentUser =
                 userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new ResourceNotFoundException(
-                "User with username="
-                + userDetails.getUsername()
-                + " could not be found."));
+                        "User with username="
+                        + userDetails.getUsername()
+                        + " could not be found."));
 
         return userModelAssembler.toModel(currentUser);
     }

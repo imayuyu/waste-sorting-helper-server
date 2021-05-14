@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/v1/settings")
@@ -31,22 +31,24 @@ public class ServerSettingsController {
 
     public ServerSettingsController(ServerSettingsRepository serverSettingsRepository,
                                     ServerSettingModelAssembler serverSettingModelAssembler) {
-        this.serverSettingsRepository=serverSettingsRepository;
-        this.serverSettingModelAssembler=serverSettingModelAssembler;
+        this.serverSettingsRepository = serverSettingsRepository;
+        this.serverSettingModelAssembler = serverSettingModelAssembler;
     }
 
     public static <Any> Any getServerSetting(String settingId,
                                              ServerSettingsRepository serverSettingsRepository) throws Exception {
         Optional<ServerSetting> referencedServerSetting = serverSettingsRepository.findById(settingId);
 
-        if(referencedServerSetting.isEmpty()){
+        if (referencedServerSetting.isEmpty()) {
             throw new ResourceNotFoundException("ServerSetting " + settingId + " not found!");
         }
 
-        if(referencedServerSetting.get().getType().equals("integer"))
-            return ((Any)((Long)(Long.parseLong(referencedServerSetting.get().getValue()))));
-        if(referencedServerSetting.get().getType().equals("decimal"))
-            return ((Any)((Double)(Double.parseDouble(referencedServerSetting.get().getValue()))));
+        if (referencedServerSetting.get().getType().equals("integer")) {
+            return ((Any) ((Long) (Long.parseLong(referencedServerSetting.get().getValue()))));
+        }
+        if (referencedServerSetting.get().getType().equals("decimal")) {
+            return ((Any) ((Double) (Double.parseDouble(referencedServerSetting.get().getValue()))));
+        }
 
         return null;
     }
@@ -55,21 +57,21 @@ public class ServerSettingsController {
     public CollectionModel<EntityModel<ServerSetting>> getServerSettingAll() {
         List<EntityModel<ServerSetting>> serverSettings =
                 serverSettingsRepository.findAll()
-                .stream()
-                .map(serverSettingModelAssembler::toModel)
-                .collect(Collectors.toList());
+                                        .stream()
+                                        .map(serverSettingModelAssembler::toModel)
+                                        .collect(Collectors.toList());
 
         return CollectionModel.of(serverSettings,
                                   linkTo(methodOn(ServerSettingsController.class).getServerSettingAll()).withSelfRel());
     }
 
     @GetMapping("/{settingId}")
-    public EntityModel<ServerSetting> getServerSettingSingle(@PathVariable String settingId){
+    public EntityModel<ServerSetting> getServerSettingSingle(@PathVariable String settingId) {
         ServerSetting referencedServerSetting =
                 serverSettingsRepository.findById(settingId)
-                .orElseThrow(() -> new ResourceNotFoundException("ServerSetting with ID=" + settingId + " could not " +
-                                                                 "be " +
-                                                                 "found."));
+                                        .orElseThrow(() -> new ResourceNotFoundException("ServerSetting with ID=" + settingId + " could not " +
+                                                                                         "be " +
+                                                                                         "found."));
 
         return serverSettingModelAssembler.toModel(referencedServerSetting);
     }

@@ -24,29 +24,28 @@ public class PreloadSettings {
     CommandLineRunner loadData(ServerSettingsRepository serverSettingsRepository,
                                UserRepository userRepository,
                                PasswordEncoder passwordEncoder) {
-        int savedSettingsCount =0;
+        int savedSettingsCount = 0;
 
-        ArrayList<ServerSetting> defaultSettings= new ArrayList<>();
-        defaultSettings.add(new ServerSetting("creditUpdateDelay","120","integer")); //second
-        defaultSettings.add(new ServerSetting("rankingUpdateDelay","3600","integer")); //second
-        defaultSettings.add(new ServerSetting("wasteWeightThreshold","10","decimal"));// kg
-        defaultSettings.add(new ServerSetting("tokenExpirationDelay","604800","integer"));// second
+        ArrayList<ServerSetting> defaultSettings = new ArrayList<>();
+        defaultSettings.add(new ServerSetting("creditUpdateDelay", "120", "integer")); //second
+        defaultSettings.add(new ServerSetting("rankingUpdateDelay", "3600", "integer")); //second
+        defaultSettings.add(new ServerSetting("wasteWeightThreshold", "10", "decimal"));// kg
+        defaultSettings.add(new ServerSetting("tokenExpirationDelay", "604800", "integer"));// second
 
 
-        for(ServerSetting i:defaultSettings){
+        for (ServerSetting i : defaultSettings) {
             Optional<ServerSetting> setting = serverSettingsRepository.findById(i.getId());
 
-            if(setting.isEmpty()){
+            if (setting.isEmpty()) {
                 savedSettingsCount++;
                 serverSettingsRepository.save(i);
             }
         }
 
 
-
         Optional<User> admin = userRepository.findByUsername("admin");
 
-        if(admin.isEmpty()){
+        if (admin.isEmpty()) {
             User newAdmin = new User();
             newAdmin.setUsername("admin");
             newAdmin.setPassword(passwordEncoder.encode("78QjIthLby1K"));

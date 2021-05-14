@@ -1,7 +1,6 @@
 package com.charliechiang.wastesortinghelperserver.security;
 
 import com.charliechiang.wastesortinghelperserver.controller.ServerSettingsController;
-import com.charliechiang.wastesortinghelperserver.controller.WebSocketController;
 import com.charliechiang.wastesortinghelperserver.repository.ServerSettingsRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -11,7 +10,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.stereotype.Component;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

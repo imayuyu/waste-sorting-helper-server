@@ -20,11 +20,11 @@ public class School {
     public School(Long id,
                   String name,
                   String ename,
-                  Integer studentCount){
-        this.id=id;
-        this.name=name;
-        this.ename=ename;
-        this.studentCount=studentCount;
+                  Integer studentCount) {
+        this.id = id;
+        this.name = name;
+        this.ename = ename;
+        this.studentCount = studentCount;
     }
 
     public Long getId() {

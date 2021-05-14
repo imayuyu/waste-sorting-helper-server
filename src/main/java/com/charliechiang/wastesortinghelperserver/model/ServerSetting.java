@@ -1,7 +1,5 @@
 package com.charliechiang.wastesortinghelperserver.model;
 
-import org.springframework.stereotype.Repository;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
