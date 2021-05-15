@@ -15,15 +15,15 @@ public interface WasteRepository extends JpaRepository<Waste, Long> {
 
     ArrayList<Waste> findTop5ByDustbinOrderByIdDesc(Dustbin dustbin);
 
-    ArrayList<Waste> findByDustbinOrderByIdDesc(Dustbin dustbin);
+    ArrayList<Waste> findByDustbinOrderByTimeDesc(Dustbin dustbin);
 
-    ArrayList<Waste> findByUserOrderByIdDesc(User user);
+    ArrayList<Waste> findByUserOrderByTimeDesc(User user);
 
     ArrayList<Waste> findAllByUser(User user);
 
     ArrayList<Waste> findAllByUserAndTimeIsAfter(User user, LocalDateTime time);
 
-    ArrayList<Waste> findTop20ByUserOrderByIdDesc(User user);
+    ArrayList<Waste> findTop20ByUserOrderByTimeDesc(User user);
 
     ArrayList<Waste> findByCategory(WasteCategory category);
 

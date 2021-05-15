@@ -146,8 +146,8 @@ public class DustbinController {
     public CollectionModel<EntityModel<Waste>> getWasteAllByDustbin(@PathVariable Long id) {
 
         List<EntityModel<Waste>> wastes =
-                wasteRepository.findByDustbinOrderByIdDesc(dustbinRepository.findById(id)
-                                                                            .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
+                wasteRepository.findByDustbinOrderByTimeDesc(dustbinRepository.findById(id)
+                                                                              .orElseThrow(() -> new ResourceNotFoundException("Dustbin with ID="
                                                                                                                              + id
                                                                                                                              + " could not be found.")))
                                .stream()

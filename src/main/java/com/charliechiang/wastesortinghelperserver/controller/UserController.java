@@ -103,17 +103,17 @@ public class UserController {
         List<EntityModel<Waste>> wastes;
 
         if (20 == n) {
-            wastes = wasteRepository.findTop20ByUserOrderByIdDesc(currentUser)
+            wastes = wasteRepository.findTop20ByUserOrderByTimeDesc(currentUser)
                                     .stream()
                                     .map(wasteModelAssembler::toModel)
                                     .collect(Collectors.toList());
         } else if (0 == n) {
-            wastes = wasteRepository.findByUserOrderByIdDesc(currentUser)
+            wastes = wasteRepository.findByUserOrderByTimeDesc(currentUser)
                                     .stream()
                                     .map(wasteModelAssembler::toModel)
                                     .collect(Collectors.toList());
         } else {
-            wastes = Arrays.stream((Waste[]) Arrays.copyOfRange(wasteRepository.findByUserOrderByIdDesc(currentUser).toArray(),
+            wastes = Arrays.stream((Waste[]) Arrays.copyOfRange(wasteRepository.findByUserOrderByTimeDesc(currentUser).toArray(),
                                                                 0,
                                                                 n.intValue()))
                            .map(wasteModelAssembler::toModel)
@@ -244,17 +244,17 @@ public class UserController {
         List<EntityModel<Waste>> wastes;
 
         if (20 == n) {
-            wastes = wasteRepository.findTop20ByUserOrderByIdDesc(referencedUser)
+            wastes = wasteRepository.findTop20ByUserOrderByTimeDesc(referencedUser)
                                     .stream()
                                     .map(wasteModelAssembler::toModel)
                                     .collect(Collectors.toList());
         } else if (0 == n) {
-            wastes = wasteRepository.findByUserOrderByIdDesc(referencedUser)
+            wastes = wasteRepository.findByUserOrderByTimeDesc(referencedUser)
                                     .stream()
                                     .map(wasteModelAssembler::toModel)
                                     .collect(Collectors.toList());
         } else {
-            wastes = Arrays.stream((Waste[]) Arrays.copyOfRange(wasteRepository.findByUserOrderByIdDesc(referencedUser).toArray(),
+            wastes = Arrays.stream((Waste[]) Arrays.copyOfRange(wasteRepository.findByUserOrderByTimeDesc(referencedUser).toArray(),
                                                                 0,
                                                                 n.intValue()))
                            .map(wasteModelAssembler::toModel)
