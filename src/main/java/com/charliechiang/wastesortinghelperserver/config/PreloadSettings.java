@@ -1,7 +1,9 @@
 package com.charliechiang.wastesortinghelperserver.config;
 
+import com.charliechiang.wastesortinghelperserver.model.School;
 import com.charliechiang.wastesortinghelperserver.model.ServerSetting;
 import com.charliechiang.wastesortinghelperserver.model.User;
+import com.charliechiang.wastesortinghelperserver.repository.SchoolRepository;
 import com.charliechiang.wastesortinghelperserver.repository.ServerSettingsRepository;
 import com.charliechiang.wastesortinghelperserver.repository.UserRepository;
 import org.slf4j.Logger;
@@ -23,6 +25,7 @@ public class PreloadSettings {
     @Bean
     CommandLineRunner loadData(ServerSettingsRepository serverSettingsRepository,
                                UserRepository userRepository,
+                               SchoolRepository schoolRepository,
                                PasswordEncoder passwordEncoder) {
 
         int savedSettingsCount = 0;
@@ -43,6 +46,16 @@ public class PreloadSettings {
             }
         }
 
+        Optional<School> school = schoolRepository.findById(0L);
+
+        if(school.isEmpty()){
+            School newSchool = new School();
+            newSchool.setEname("Other");
+            newSchool.setName("其他学院");
+            newSchool.setId(0L);
+            schoolRepository.save(newSchool);
+        }
+
 
         Optional<User> admin = userRepository.findByUsername("admin");
 
@@ -51,6 +64,7 @@ public class PreloadSettings {
             newAdmin.setUsername("admin");
             newAdmin.setPassword(passwordEncoder.encode("password"));
             newAdmin.setRoles(Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
+            newAdmin.setSchool(school.get());
             userRepository.save(newAdmin);
         }
 

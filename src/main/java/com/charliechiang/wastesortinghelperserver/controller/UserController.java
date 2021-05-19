@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -179,7 +181,10 @@ public class UserController {
             throw new BadCredentialsException("You can only update your own account.");
         }
 
-        return saveUser(userCreationForm, Collections.singletonList("ROLE_USER"));
+        User referencedUser =
+                userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new ResourceNotFoundException(""));
+
+        return saveUser(userCreationForm, referencedUser.getRoles());
     }
 
     @PutMapping("/{username}")
@@ -222,10 +227,17 @@ public class UserController {
     //                             .body(entityModel);
     //    }
 
+    @Transactional
     @DeleteMapping("/{username}")
     public ResponseEntity<?> deleteUser(@PathVariable String username) {
 
-        userRepository.deleteByUsername(username);
+        User referencedUser =
+                userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User with username="
+                                                                                                        + username
+                                                                                                        + " could not be found."));
+
+        wasteRepository.deleteAllByUser(referencedUser);
+        userRepository.deleteById(referencedUser.getId());
 
         return ResponseEntity.noContent().build();
     }
@@ -406,7 +418,10 @@ public class UserController {
         // update college ranking and split users to schools
         for (int i = 0; i < collegeRanking.size(); i++) {
             collegeRanking.get(i).setCollegeRanking(i + 1);
-            schoolRankings.get(collegeRanking.get(i).getSchool()).add(collegeRanking.get(i));
+            if(collegeRanking.get(i).getSchool()!=null){
+                schoolRankings.get(collegeRanking.get(i).getSchool()).add(collegeRanking.get(i));
+            }
+
         }
         collegeStudentCountCache = collegeRanking.size();
 
@@ -457,7 +472,7 @@ class UserCreationForm {
     @NotNull
     private String realName;
     private String openId = "";
-    private Long schoolId = -1L;
+    private Long schoolId = 0L;
     private Short timeOfEnrollment = -1;
 
     public UserCreationForm() {

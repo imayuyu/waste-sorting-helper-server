@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .authorizeRequests(c -> c
                                            // ---------- AuthenticationController ----------
                                            // Permit All - sign in
-                                           .antMatchers("/api/v1/auth/signin").permitAll()
+                                           .antMatchers("/api/v1/auth/login").permitAll()
 
                                            // ---------- DustbinController ----------
                                            // Admin only - add dustbins

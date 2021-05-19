@@ -29,5 +29,7 @@ public interface WasteRepository extends JpaRepository<Waste, Long> {
 
     ArrayList<Waste> findByUserAndIsCorrectlyCategorizedIsTrue(User user);
 
+    void deleteAllByUser(User user);
+
     Waste findById(long id);
 }

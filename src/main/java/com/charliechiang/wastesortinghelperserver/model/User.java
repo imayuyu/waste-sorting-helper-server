@@ -1,6 +1,8 @@
 package com.charliechiang.wastesortinghelperserver.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -53,6 +55,7 @@ public class User implements UserDetails {
     private String unionId;
     @JsonBackReference
     private Boolean needFullCreditUpdate = false;
+
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles = new ArrayList<>();
 

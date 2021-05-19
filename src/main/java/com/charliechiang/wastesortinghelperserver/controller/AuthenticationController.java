@@ -36,8 +36,8 @@ public class AuthenticationController {
         this.userRepository = userRepository;
     }
 
-    @PostMapping("/signin")
-    public ResponseEntity<?> signin(@RequestBody AuthenticationRequest data) {
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody AuthenticationRequest data) {
 
         try {
             String username = data.getUsername();
