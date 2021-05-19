@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(c -> c.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeRequests(c -> c
+                                           .antMatchers("/").permitAll()
                                            // ---------- AuthenticationController ----------
                                            // Permit All - sign in
                                            .antMatchers("/api/v1/auth/login").permitAll()
