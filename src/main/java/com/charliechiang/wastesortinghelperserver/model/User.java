@@ -55,6 +55,13 @@ public class User implements UserDetails {
     private String unionId;
     @JsonBackReference
     private Boolean needFullCreditUpdate = false;
+    private int remainingWater = 0;
+    private int remainingFertilizer = 0;
+    private int remainingMedicine = 0;
+    private int water = 0;
+    private int fertilizer = 0;
+    private int medicine = 0;
+    private int level = 0;
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles = new ArrayList<>();
@@ -234,5 +241,61 @@ public class User implements UserDetails {
 
     public void setRoles(List<String> roles) {
         this.roles = roles;
+    }
+
+    public int getRemainingWater() {
+        return remainingWater;
+    }
+
+    public void setRemainingWater(int remainingWater) {
+        this.remainingWater = remainingWater;
+    }
+
+    public int getRemainingFertilizer() {
+        return remainingFertilizer;
+    }
+
+    public void setRemainingFertilizer(int remainingFertilizer) {
+        this.remainingFertilizer = remainingFertilizer;
+    }
+
+    public int getRemainingMedicine() {
+        return remainingMedicine;
+    }
+
+    public void setRemainingMedicine(int remainingMedicine) {
+        this.remainingMedicine = remainingMedicine;
+    }
+
+    public int getWater() {
+        return water;
+    }
+
+    public void setWater(int water) {
+        this.water = water;
+    }
+
+    public int getFertilizer() {
+        return fertilizer;
+    }
+
+    public void setFertilizer(int fertilizer) {
+        this.fertilizer = fertilizer;
+    }
+
+    public int getMedicine() {
+        return medicine;
+    }
+
+    public void setMedicine(int medicine) {
+        this.medicine = medicine;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
     }
 }

@@ -69,6 +69,14 @@ public class SecurityConfig {
                                            .antMatchers(HttpMethod.GET, "/api/v1/users/me/**").authenticated()
                                            // Authenticate - update me
                                            .antMatchers(HttpMethod.PUT, "/api/v1/users/me/**").authenticated()
+                                           // Authenticate - update my tree info
+                                           .antMatchers(HttpMethod.PUT, "/api/v1/users/me/tree").authenticated()
+                                           // Authenticate - get my tree info
+                                           .antMatchers(HttpMethod.GET, "/api/v1/users/me/tree").authenticated()
+                                           // Authenticate - update another user's credit (temporary workaround)
+                                           .antMatchers(HttpMethod.PUT, "/api/v1/users/*/credit").authenticated()
+                                           // Authenticate - get another user's credit (temporary workaround)
+                                           .antMatchers(HttpMethod.GET, "/api/v1/users/*/credit").authenticated()
                                            // Admin only - get a user
                                            .antMatchers(HttpMethod.GET, "/api/v1/users/**").hasRole("ADMIN")
                                            // Admin only - update a user

@@ -15,6 +15,7 @@ import com.charliechiang.wastesortinghelperserver.repository.WasteRepository;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -291,6 +291,22 @@ public class UserController {
         return referencedUser.getCredit();
     }
 
+    @PutMapping("/{username}/credit")
+    public ResponseEntity<?> updateCreditByUser(@PathVariable(value = "username") String username,
+                                                @RequestBody UserCreditUpdateForm userCreditUpdateForm) throws Exception {
+
+        User referencedUser = userRepository.findByUsername(username)
+                                            .orElseThrow(() -> new ResourceNotFoundException("User with username="
+                                                                                             + username
+                                                                                             + " could not be found."));
+
+        referencedUser.setCredit(userCreditUpdateForm.getCredit());
+        userRepository.save(referencedUser);
+        updateCredit(referencedUser, false);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new UserCreditUpdateForm(referencedUser.getCredit()));
+    }
+
     @GetMapping("/me/credit")
     public int getCreditByToken(@AuthenticationPrincipal UserDetails userDetails) throws Exception {
 
@@ -418,7 +434,7 @@ public class UserController {
         // update college ranking and split users to schools
         for (int i = 0; i < collegeRanking.size(); i++) {
             collegeRanking.get(i).setCollegeRanking(i + 1);
-            if(collegeRanking.get(i).getSchool()!=null){
+            if (collegeRanking.get(i).getSchool() != null) {
                 schoolRankings.get(collegeRanking.get(i).getSchool()).add(collegeRanking.get(i));
             }
 
@@ -460,6 +476,56 @@ public class UserController {
 
         return CollectionModel.of(admins,
                                   linkTo(methodOn(UserController.class).getUserAll()).withSelfRel());
+    }
+
+    @GetMapping("/me/tree")
+    public TreeInfo getMyTreeInfo(@AuthenticationPrincipal UserDetails userDetails) {
+
+        User referencedUser = userRepository.findByUsername(userDetails.getUsername())
+                                            .orElseThrow(() -> new ResourceNotFoundException("User with username="
+                                                                                             + userDetails.getUsername()
+                                                                                             + " could not be found."));
+
+        return new TreeInfo(referencedUser.getRemainingWater(),
+                            referencedUser.getRemainingFertilizer(),
+                            referencedUser.getRemainingMedicine(),
+                            referencedUser.getWater(),
+                            referencedUser.getFertilizer(),
+                            referencedUser.getMedicine(),
+                            referencedUser.getLevel());
+    }
+
+    @PutMapping("/me/tree")
+    public ResponseEntity<?> updateMyTreeInfo(@AuthenticationPrincipal UserDetails userDetails,
+                                              @RequestBody TreeInfo treeInfo) {
+
+        User referencedUser = userRepository.findByUsername(userDetails.getUsername())
+                                            .orElseThrow(() -> new ResourceNotFoundException("User with username="
+                                                                                             + userDetails.getUsername()
+                                                                                             + " could not be found."));
+
+        if (treeInfo.getRemainingWater() < 0 ||
+            treeInfo.getRemainingFertilizer() < 0 ||
+            treeInfo.getRemainingMedicine() < 0 ||
+            treeInfo.getWater() < 0 ||
+            treeInfo.getFertilizer() < 0 ||
+            treeInfo.getMedicine() < 0 ||
+            treeInfo.getLevel() < 0) {
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        referencedUser.setRemainingWater(treeInfo.getRemainingWater());
+        referencedUser.setRemainingFertilizer(treeInfo.getRemainingFertilizer());
+        referencedUser.setRemainingMedicine(treeInfo.getRemainingMedicine());
+        referencedUser.setWater(treeInfo.getWater());
+        referencedUser.setFertilizer(treeInfo.getFertilizer());
+        referencedUser.setMedicine(treeInfo.getMedicine());
+        referencedUser.setLevel(treeInfo.getLevel());
+
+        userRepository.save(referencedUser);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
 
@@ -575,5 +641,108 @@ class PersonalRankingData {
 
     public void setCollegeStudentCount(Integer collegeStudentCount) {
         this.collegeStudentCount = collegeStudentCount;
+    }
+}
+
+class TreeInfo {
+    private int remainingWater;
+    private int remainingFertilizer;
+    private int remainingMedicine;
+    private int water;
+    private int fertilizer;
+    private int medicine;
+    private int level;
+
+    public TreeInfo(int remainingWater,
+                    int remainingFertilizer,
+                    int remainingMedicine,
+                    int water,
+                    int fertilizer,
+                    int medicine,
+                    int level) {
+
+        this.remainingWater = remainingWater;
+        this.remainingFertilizer = remainingFertilizer;
+        this.remainingMedicine = remainingMedicine;
+        this.water = water;
+        this.fertilizer = fertilizer;
+        this.medicine = medicine;
+        this.level = level;
+    }
+
+    public int getRemainingWater() {
+        return remainingWater;
+    }
+
+    public void setRemainingWater(int remainingWater) {
+        this.remainingWater = remainingWater;
+    }
+
+    public int getRemainingFertilizer() {
+        return remainingFertilizer;
+    }
+
+    public void setRemainingFertilizer(int remainingFertilizer) {
+        this.remainingFertilizer = remainingFertilizer;
+    }
+
+    public int getRemainingMedicine() {
+        return remainingMedicine;
+    }
+
+    public void setRemainingMedicine(int remainingMedicine) {
+        this.remainingMedicine = remainingMedicine;
+    }
+
+    public int getWater() {
+        return water;
+    }
+
+    public void setWater(int water) {
+        this.water = water;
+    }
+
+    public int getFertilizer() {
+        return fertilizer;
+    }
+
+    public void setFertilizer(int fertilizer) {
+        this.fertilizer = fertilizer;
+    }
+
+    public int getMedicine() {
+        return medicine;
+    }
+
+    public void setMedicine(int medicine) {
+        this.medicine = medicine;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+}
+
+class UserCreditUpdateForm {
+    private Integer credit;
+
+    public UserCreditUpdateForm() {
+
+    }
+
+    public UserCreditUpdateForm(Integer credit) {
+        this.credit = credit;
+    }
+
+    public Integer getCredit() {
+        return credit;
+    }
+
+    public void setCredit(Integer credit) {
+        this.credit = credit;
     }
 }
