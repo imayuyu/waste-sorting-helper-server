@@ -77,6 +77,8 @@ public class SecurityConfig {
                                            .antMatchers(HttpMethod.PUT, "/api/v1/users/*/credit").authenticated()
                                            // Authenticate - get another user's credit (temporary workaround)
                                            .antMatchers(HttpMethod.GET, "/api/v1/users/*/credit").authenticated()
+                                           // Authenticate - offset another user's credit (temporary workaround)
+                                           .antMatchers(HttpMethod.PUT, "/api/v1/users/*/credit/offset").authenticated()
                                            // Admin only - get a user
                                            .antMatchers(HttpMethod.GET, "/api/v1/users/**").hasRole("ADMIN")
                                            // Admin only - update a user

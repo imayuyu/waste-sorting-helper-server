@@ -307,6 +307,22 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new UserCreditUpdateForm(referencedUser.getCredit()));
     }
 
+    @PutMapping("/{username}/credit/offset")
+    public ResponseEntity<?> offsetCreditByUser(@PathVariable(value = "username") String username,
+                                                @RequestParam Integer offset) throws Exception {
+
+        User referencedUser = userRepository.findByUsername(username)
+                                            .orElseThrow(() -> new ResourceNotFoundException("User with username="
+                                                                                             + username
+                                                                                             + " could not be found."));
+
+        referencedUser.setCredit(referencedUser.getCredit() + offset);
+        userRepository.save(referencedUser);
+        updateCredit(referencedUser, false);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new UserCreditUpdateForm(referencedUser.getCredit()));
+    }
+
     @GetMapping("/me/credit")
     public int getCreditByToken(@AuthenticationPrincipal UserDetails userDetails) throws Exception {
 
